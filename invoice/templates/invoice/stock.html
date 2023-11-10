@@ -1,0 +1,181 @@
+{% extends 'invoice/base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block title_block %}
+  Stocks
+{% endblock %}
+
+{% block body_block %}
+  <div class="input-container">
+    <h3>New items/services</h3>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="success-alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="tab">
+      <button class="tab-links active" onclick="openTab(event, 'item-form')">
+        Items
+      </button>
+      <button class="tab-links" onclick="openTab(event, 'service-form')">
+        Services
+      </button>
+    </div>
+
+    <form id="item-form" class="tab-content active" action="{% url 'invoice:stock' %}" method="post">
+      {% csrf_token %}
+
+      {% for hidden in item_form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <table class="input-table">
+        {% for field in item_form.visible_fields %}
+          {{ field.errors }}
+          <tr>
+            <td class="label">{{ field.label }}</td>
+            <td class="field">{{ field }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td></td>
+          <td class="right-align">
+            <button type="submit" class="btn btn-primary">
+              Add
+            </button>
+          </td>
+        </tr>
+      </table>
+    </form>
+
+    <form id="service-form" class="tab-content" action="{% url 'invoice:stock' %}" method="post">
+      {% csrf_token %}
+
+      {% for hidden in service_form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <table class="input-table">
+        {% for field in service_form.visible_fields %}
+          {{ field.errors }}
+          <tr>
+            <td class="label">{{ field.label }}</td>
+            <td class="field">{{ field }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td></td>
+          <td class="right-align">
+            <button type="submit" class="btn btn-primary">
+              Add
+            </button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+  <div class="display-container">
+    <h3>Available stock</h3>
+
+    <div class="search-form">
+      <form class="flex-contents" id="search" method="get" action="{% url 'invoice:stock' %}">
+        <div class="search-field">
+          <label for="search-text">Search items/services</label>
+          <input
+            id="search-text"
+            type="text"
+            name="q"
+            placeholder="Item or service"/>
+        </div>
+        <div class="search-field">
+          <p>&nbsp;</p>
+          <button class="btn btn-secondary" type="submit">
+            <img src="{% static 'images/icon-search.png' %}" alt="search">
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <table class="data-table">
+      <tr>
+        <th>Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Type</th>
+        <th></th>
+      </tr>
+
+      {% if stocks %}
+        {% for item in stocks %}
+          <tr>
+            <td>{{ item.name }}</td>
+            {% if item.item_type %}
+              <td class="center-field">{{ item.quantity }}</td>
+              <td>₹{{ item.price|intcomma }}.00</td>
+              <td>ITEMS</td>
+            {% else %}
+              <td class="center-field">-</td>
+              <td>₹{{ item.price|intcomma }}.00</td>
+              <td>SERVICES</td>
+            {% endif %}
+            <td class="center-field">
+              <a class="icon-edit" href="{% url 'invoice:item' item.id %}">
+                <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      {% endif %}
+    </table>
+
+    <div class="pagination">
+      <span class="step-links">
+        {% if stocks.has_previous %}
+        <a href="?page=1&amp;{{ query }}">&laquo; First</a>
+
+        <a href="?page={{ stocks.previous_page_number }}&amp;{{ query }}">
+          Previous
+        </a>
+        {% endif %}
+
+        <span class="current">
+          Page {{ stocks.number }} of {{ stocks.paginator.num_pages }}
+        </span>
+
+        {% if stocks.has_next %}
+          <a href="?page={{ stocks.next_page_number }}&amp;{{ query }}">
+            Next
+          </a>
+
+          <a href="?page={{ stocks.paginator.num_pages }}&amp;{{ query }}">
+            Last &raquo;
+          </a>
+        {% endif %}
+      </span>
+    </div>
+  </div>
+
+  <script>
+    /*Tab design */
+    function openTab(evt, tabName) {
+      let i, tabContent, tabLinks;
+      tabContent = document.getElementsByClassName("tab-content");
+      tabContent[0].className = tabContent[0].className.replace(" active", "");
+      tabContent[1].className = tabContent[1].className.replace(" active", "");
+
+      tabLinks = document.getElementsByClassName("tab-links");
+      tabLinks[0].className = tabLinks[0].className.replace(" active", "");
+      tabLinks[1].className = tabLinks[1].className.replace(" active", "");
+
+      document.getElementById(tabName).className += " active"
+      evt.currentTarget.className += " active";
+    }
+  </script>
+{% endblock %}

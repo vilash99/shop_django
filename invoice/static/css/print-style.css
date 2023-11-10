@@ -1,0 +1,94 @@
+:root {
+  --clr-black: #000;
+  --clr-light-gray: #eeeeee;
+  --ff-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--clr-black);
+  font-family: var(--ff-primary);
+  font-size: 0.725rem;
+}
+
+img {
+  width: 100%;
+}
+
+/*Invoice Print Design*/
+.div-flex {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.company-name {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.company-logo {
+  width: 80px;
+  height: 80px;
+}
+
+.bill-title {
+  text-align: center;
+  margin: 0.2rem 0 1rem 0;
+  text-transform: uppercase;
+}
+
+
+.data-table {
+  margin: 0.5rem 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table tr th {
+  background-color: var(--clr-light-gray);
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--clr-black);
+}
+
+.data-table tr td {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--clr-black);
+}
+
+.data-table .center-field {
+  text-align: center;
+}
+
+.data-table .right-field {
+  text-align: right;
+}
+
+.data-table .name-cell {
+  width: 45%;
+}
+
+.total-amount {
+  font-size: 1.25rem;
+}
+
+.total-amount span {
+  font-weight: 800;
+}
+
+.small-text {
+  font-size: 0.7rem;
+}
+
+@media print {
+  @page {
+    size: 148mm 210mm; /* landscape */
+    /* you can also specify margins here:*/
+    margin: 5mm;
+  }
+}

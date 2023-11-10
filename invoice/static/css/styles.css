@@ -1,0 +1,334 @@
+:root {
+  --clr-primary: #222831;
+  --clr-secondary: #00adB5;
+  --clr-green: #609966;
+  --clr-light-gray: #eeeeee;
+  --clr-white: #fff;
+  --clr-black: #000;
+  --clr-success: #d4edda;
+
+  --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  --border-radius: 0.3rem;
+  --ff-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --transition: all 0.3s ease-in-out;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #F2FAFB;
+  color: var(--clr-black);
+  font-family: var(--ff-primary);
+  font-size: 1rem;
+}
+
+h3 {
+  color: var(--clr-secondary);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+a {
+  text-decoration: none;
+  display: inline-block;
+}
+
+input, select {
+  background-color: var(--clr-white);
+  border: 1px solid #707070;
+  font-family: var(--ff-primary);
+  font-size: 1rem;
+  height: 30px;
+  width: 100%;
+  padding: 0 0.25rem;
+}
+
+img {
+  width: 100%;
+}
+
+.btn {
+  background-color: var(--clr-primary);
+  border-radius: var(--border-radius);
+  border: transparent;
+  color: var(--clr-white);
+  cursor: pointer;
+  font-family: var(--ff-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 1;
+  text-transform: capitalize;
+  transition: var(--transition);
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn-primary {
+  margin-top: 1rem;
+  padding: 0.6rem 1.5rem;
+}
+
+.btn-secondary {
+  padding: 0.3rem 1rem;
+}
+
+.anchor-btn {
+  background-color: var(--clr-white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--clr-primary);
+  color: var(--clr-primary);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  opacity: 1;
+  padding: 0.5rem 1.2rem;
+  text-transform: capitalize;
+  transition: var(--transition);
+}
+
+.anchor-btn:hover {
+  background-color: var(--clr-primary);
+  color: var(--clr-white);
+}
+
+.icon-delete,
+.icon-edit,
+.icon-print {
+  cursor: pointer;
+}
+
+
+/* Navigation bar design */
+.navbar {
+  width: 100%;
+  background-color: var(--clr-light-gray);
+  padding: 0.5rem 0;
+}
+
+.nav-center {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1140px;
+  width: 95vw;
+}
+
+.brand-logo {
+  color: var(--clr-secondary);
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  align-items: center;
+  display: flex;
+  gap: 2rem;
+  justify-content: right;
+}
+
+.nav-link {
+  color: var(--clr-black);
+  font-weight: bold;
+  margin-left: 3rem;
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--clr-secondary);
+}
+
+/* Footer design */
+footer {
+  background-color: var(--clr-primary);
+  color: var(--clr-white);
+  margin-top: 2rem;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+/* Page design, common for all pages */
+.container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.input-container,
+.display-container {
+  background-color: var(--clr-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.input-container {
+  width: 450px;
+}
+
+.display-container {
+  width: 840px;
+}
+
+.input-table {
+  width: 100%;
+}
+
+.input-table .label {
+  width: 30%;
+  padding: 0.725rem 0;
+}
+
+.input-table .field {
+  width: 100%;
+}
+
+.right-align {
+  text-align: right;
+}
+
+.search-form {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex-contents {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.data-table {
+  margin: 1.5rem 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table tr th {
+  background-color: var(--clr-light-gray);
+  padding: 0.5rem 0;
+  border: 1px solid var(--clr-black);
+}
+
+.data-table tr td {
+  padding: 0.5rem;
+  border: 1px solid var(--clr-black);
+}
+
+.data-table .center-field {
+  text-align: center;
+}
+
+.data-table .price-field {
+  color: var(--clr-green);
+  font-weight: bold;
+}
+
+.total-field {
+  font-size: 1.5rem;
+  text-align: right;
+}
+
+.total-value {
+  color: var(--clr-green);
+  font-weight: bold;
+}
+
+.hr-separator {
+  color: var(--clr-light-gray);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.heading-flex {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.heading-flex img {
+  width: 30px;
+  height: 25px;
+}
+
+#total-quantity {
+  font-size: 0.75rem;
+  color: var(--clr-green);
+}
+
+/* Transaction Form Tab design */
+.tab {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1px;
+}
+
+.tab .tab-links {
+  background-color: var(--clr-light-gray);
+  border: 1px solid var(--clr-green);
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  width: 100%;
+}
+
+.tab .tab-links.active {
+  background-color: var(--clr-green);
+  color: var(--clr-white);
+}
+
+.tab .tab-links:hover {
+  background-color: var(--clr-green);
+  color: var(--clr-white);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+/* Tab design end */
+
+.success-alert {
+  background-color: var(--clr-success);
+  border-color: var(--clr-success);
+  border-radius: var(--border-radius);
+  color: var(--clr-green);
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.25rem;
+}
+
+.center-container {
+  height: 70vh;
+  text-align: center;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-container h4 {
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.center-container h1 {
+  font-size: 4rem;
+}

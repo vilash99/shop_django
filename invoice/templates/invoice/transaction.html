@@ -1,0 +1,237 @@
+{% extends 'invoice/base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block title_block %}
+  Invoice Transaction
+{% endblock %}
+
+{% block body_block %}
+  <div class="input-container">
+    <h3>Add invoice items/services</h3>
+
+    {% if data %}
+      <table class="input-table">
+        <tr>
+          <td>Invoice date:</td>
+          <td><strong>{{ data.bill_date|date:"d-m-Y" }}</strong></td>
+        </tr>
+        <tr>
+          <td>Party name:</td>
+          <td><strong>{{ data.party.name }}</strong></td>
+        </tr>
+      </table>
+      <hr class="hr-separator">
+    {% endif %}
+
+    <div class="tab">
+      <button class="tab-links active" onclick="openTab(event, 'items')">
+        Items
+      </button>
+      <button class="tab-links" onclick="openTab(event, 'services')">
+        Services
+      </button>
+    </div>
+
+    <form id="items" class="tab-content active" action="{% url 'invoice:transaction' p_id %}" method="post">
+      {% csrf_token %}
+
+      {% for hidden in item_form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <table class="input-table">
+        {% for field in item_form.visible_fields %}
+          {{ field.errors }}
+          <tr>
+            <td class="label">{{ field.label }}</td>
+            <td class="field">
+              {{ field }}
+              {% if field.label == 'Quantity' %}
+                <p id="total-quantity">Total quantity: 0</p>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td>
+            <a class="anchor-btn" href="{% url 'invoice:invoice' %}">
+              Back
+            </a>
+          </td>
+          <td class="right-align">
+            <button type="submit" class="btn btn-primary">
+              Add
+            </button>
+          </td>
+        </tr>
+      </table>
+    </form>
+
+    <form id="services" class="tab-content" action="{% url 'invoice:transaction' p_id %}" method="post">
+      {% csrf_token %}
+
+      {% for hidden in service_form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <table class="input-table">
+        {% for field in service_form.visible_fields %}
+          {{ field.errors }}
+          <tr>
+            <td class="label">{{ field.label }}</td>
+            <td class="field">{{ field }}</td>
+          </tr>
+        {% endfor %}
+
+        <tr>
+          <td>
+            <a class="anchor-btn" href="{% url 'invoice:invoice' %}">
+              Back
+            </a>
+          </td>
+          <td class="right-align">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+  <div class="display-container">
+
+    <div class="heading-flex">
+      <h3>All Transactions</h3>
+
+      <a class="icon-print" href="{% url 'invoice:print-invoice' p_id %}" target="_blank">
+        <img src="{% static 'images/icon-print.png' %}" alt="Print">
+      </a>
+    </div>
+
+    <table class="data-table">
+      <tr>
+        <th>Items</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Amount</th>
+        <th></th>
+      </tr>
+      {% for trans in transactions %}
+        <tr>
+          <td>{{ trans.item.name }}</td>
+          <td>₹{{ trans.price|intcomma }}.00</td>
+          <td class="center-field">
+            {% if trans.quantity == 0 %}
+              -
+            {% else %}
+              {{ trans.quantity }}
+            {% endif %}
+          </td>
+          <td class="price-field">₹{{ trans.amount|intcomma }}.00</td>
+          <td class="center-field">
+            <a class="icon-delete" trans-id="{{trans.id}}">
+              <img src="{% static 'images/icon-delete.png' %}" alt="Delete">
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    <div class="total-field">
+      Total sales:
+      <span class="total-value">
+        ₹{{ net_total.amount__sum|intcomma }}.00
+      </span>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script type='text/javascript'>
+    $(document).ready(function() {
+      ///Delete transaction
+      $('.icon-delete').on('click', function() {
+        if (confirm('Are you sure to delete?')) {
+          let transId = $(this).attr("trans-id");
+          if (transId != "") {
+            $.ajax({
+              url: "{% url 'invoice:delete_transaction_ajax' %}",
+              type: "GET",
+              data: {
+                trans_id: transId,
+              },
+            }).done(function (response) {
+              location.reload();
+            });
+          }
+        }
+      });
+
+      function get_price(id, price, quantity=null) {
+        if(id != "") {
+          $.ajax({
+            url: "{% url 'invoice:get_item_ajax' %}",
+            type: 'GET',
+            data: {
+                item_id: id,
+            },
+          }).done(function(response) {
+            $(price).val(response.price);
+
+            if(quantity) {
+              $(quantity).text(`Total quantity: ${response.quantity}`);
+            }
+          });
+        }
+      }
+
+      /// Fetch item price
+      $('#items #id_item').focusout(function () {
+        let id = $(this).find(":selected").val();
+        let price = $("#items #id_price");
+        let quantity = $("#items #total-quantity");
+        get_price(id, price, quantity);
+      });
+
+      $('#services #id_item').focusout(function () {
+        let id = $(this).find(":selected").val();
+        let price = $("#services #id_amount");
+        get_price(id, price);
+      });
+
+      // Calculate total amount from quantity and price
+      function calculate_amount() {
+        let price = $("#items #id_price").val();
+        let quantity = $("#items #id_quantity").val();
+        $("#items #id_amount").val(price * quantity);
+      }
+
+      $('#items #id_price').focusout(function () {
+        calculate_amount();
+      });
+
+      $('#items #id_quantity').focusout(function () {
+        calculate_amount();
+      });
+
+    });
+  </script>
+
+  <script>
+    /*Tab design */
+    function openTab(evt, tabName) {
+      let i, tabContent, tabLinks;
+      tabContent = document.getElementsByClassName("tab-content");
+      tabContent[0].className = tabContent[0].className.replace(" active", "");
+      tabContent[1].className = tabContent[1].className.replace(" active", "");
+
+      tabLinks = document.getElementsByClassName("tab-links");
+      tabLinks[0].className = tabLinks[0].className.replace(" active", "");
+      tabLinks[1].className = tabLinks[1].className.replace(" active", "");
+
+      document.getElementById(tabName).className += " active"
+      evt.currentTarget.className += " active";
+    }
+  </script>
+{% endblock %}

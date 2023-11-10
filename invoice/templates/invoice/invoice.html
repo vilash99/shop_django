@@ -1,0 +1,194 @@
+{% extends 'invoice/base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block title_block %}
+  New Invoice
+{% endblock %}
+
+{% block body_block %}
+  <div class="input-container">
+    <h3>New invoice</h3>
+
+    <form id="form" action="{% url 'invoice:invoice' %}" method="post">
+      {% csrf_token %}
+
+      {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <table class="input-table">
+        {% for field in form.visible_fields %}
+          {{ field.errors }}
+          <tr>
+            <td class="label">{{ field.label }}</td>
+            <td class="field">{{ field }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td></td>
+          <td class="right-align">
+            <button type="submit" class="btn btn-primary">
+              Continue
+            </button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+  <div class="display-container">
+    <h3>Invoice history</h3>
+
+    <div class="search-form">
+      <form class="flex-contents" id="frmdate" method="get" action="{% url 'invoice:invoice' %}">
+        <div class="search-field">
+          <label for="from-date">Show invoice from</label>
+          <input
+            id="from-date"
+            type="date"
+            name="from-date"
+            placeholder="dd-mm-yyyy"
+          />
+        </div>
+
+        <div class="search-field">
+          <label for="to-date">To date</label>
+          <input
+            id="to-date"
+            type="date"
+            name="to-date"
+            placeholder="dd-mm-yyyy"
+          />
+        </div>
+
+        <div class="search-field">
+          <p>&nbsp;</p>
+          <button class="btn btn-secondary" type="submit">
+            <img src="{% static 'images/icon-search.png' %}" alt="search">
+          </button>
+        </div>
+      </form>
+
+      <form class="flex-contents" id="frmname" method="get" action="{% url 'invoice:invoice' %}">
+        <div class="search-field">
+          <label for="search_party">Party name</label>
+          <input
+            id="party-search"
+            type="text"
+            name="q"
+            placeholder="Party name"
+          />
+        </div>
+
+        <div class="search-field">
+          <p>&nbsp;</p>
+          <button class="btn btn-secondary" type="submit">
+            <img src="{% static 'images/icon-search.png' %}" alt="search">
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <table class="data-table">
+      <tr>
+        <th>Date</th>
+        <th>Party</th>
+        <th>Bill Total</th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+
+      {% for invoice in invoices %}
+        <tr>
+          <td>{{ invoice.bill_date|date:"d-m-Y" }}</td>
+          <td>{{ invoice.party.name }}</td>
+          <td class="price-field">
+            {% if invoice.net_total %}
+              ₹{{ invoice.net_total|intcomma }}.00
+            {% else %}
+              ₹0.00
+            {% endif %}
+          </td>
+
+          <td class="center-field">
+            <a class="icon-edit" href="{% url 'invoice:transaction' invoice.id %}">
+              <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
+            </a>
+          </td>
+          <td class="center-field">
+             <a class="icon-print" href="{% url 'invoice:print-invoice' invoice.id %}" target="_blank">
+              <img src="{% static 'images/icon-print.png' %}" alt="Print">
+            </a>
+          </td>
+          <td class="center-field">
+            <a class="icon-delete" invoice-id="{{invoice.id}}">
+              <img src="{% static 'images/icon-delete.png' %}" alt="Delete">
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    <div class="total-field">
+      Total sales:
+      <span class="total-value">
+        ₹{{ net_total.net_total__sum|intcomma }}.00
+      </span>
+    </div>
+
+    <div class="pagination">
+      {% if invoices.has_previous %}
+      <a href="?page=1&amp;{{ query }}">&laquo; First</a>
+      <a href="?page={{ invoices.previous_page_number }}&amp;{{ query }}">
+        Previous
+      </a>
+      {% endif %}
+
+      <span class="current">
+        Page {{ invoices.number }} of {{ invoices.paginator.num_pages }}
+      </span>
+
+      {% if invoices.has_next %}
+      <a href="?page={{ invoices.next_page_number }}&amp;{{ query }}">
+        Next
+      </a>
+      <a href="?page={{ invoices.paginator.num_pages }}&amp;{{ query }}">
+        Last &raquo;
+      </a>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script type='text/javascript'>
+    $(document).ready(function() {
+      ///Delete Invoice
+      $('.icon-delete').on('click', function() {
+        if (confirm('Are you sure to delete?')) {
+          let invoiceId = $(this).attr("invoice-id");
+          if (invoiceId != "") {
+            $.ajax({
+              url: "{% url 'invoice:delete_invoice_ajax' %}",
+              type: "GET",
+              data: {
+                invoice_id: invoiceId,
+              },
+            }).done(function (response) {
+              if(response.result == "failed") {
+                alert("Please delete all transaction of selected invoice before delete!");
+              }
+              else {
+                location.reload();
+              }
+            });
+          }
+        }
+      });
+    });
+  </script>
+{% endblock %}

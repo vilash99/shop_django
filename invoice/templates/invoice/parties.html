@@ -1,0 +1,128 @@
+{% extends 'invoice/base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block title_block %}
+  Parties
+{% endblock %}
+
+{% block body_block %}
+  <div class="input-container">
+    <h3>New party</h3>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="success-alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form id="party-form" action="{% url 'invoice:parties' %}" method="post">
+      {% csrf_token %}
+
+      {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <table class="input-table">
+        {% for field in form.visible_fields %}
+          {{ field.errors }}
+          <tr>
+            <td class="label">{{ field.label }}</td>
+            <td class="field">{{ field }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td></td>
+          <td class="right-align">
+            <button type="submit" class="btn btn-primary">
+              Save
+            </button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+  <div class="display-container">
+    <div class="search-form">
+      <form class="flex-contents" id="search" method="get" action="{% url 'invoice:parties' %}">
+        <div class="search-field">
+          <label for="from-date">Search party name</label>
+          <input
+            id="search-text"
+            type="text"
+            name="q"
+            placeholder="Party name"
+          />
+        </div>
+        <div class="search-field">
+          <p>&nbsp;</p>
+          <button class="btn btn-secondary" type="submit">
+            <img src="{% static 'images/icon-search.png' %}" alt="search">
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <table class="data-table">
+      <tr>
+        <th>Name</th>
+        <th>Total bill</th>
+        <th>Phone</th>
+        <th>Address</th>
+        <th></th>
+      </tr>
+
+      {% if parties %}
+        {% for party in parties %}
+          <tr>
+            <td>{{ party.name }}</td>
+            <td class="price-field">
+              {% if party.total_bill %}
+                ₹{{ party.total_bill|intcomma }}.00
+              {% else %}
+                ₹0.00
+              {% endif %}
+            </td>
+            <td>{{ party.phone }}</td>
+            <td>{{ party.address }}</td>
+            <td class="center-field">
+              <a class="icon-edit" href="{% url 'invoice:party' party.id %}">
+                <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      {% endif %}
+    </table>
+
+    <div class="pagination">
+      <span class="step-links">
+        {% if parties.has_previous %}
+        <a href="?page=1&amp;{{ query }}">&laquo; First</a>
+
+        <a href="?page={{ parties.previous_page_number }}&amp;{{ query }}">
+          Previous
+        </a>
+        {% endif %}
+
+        <span class="current">
+          Page {{ parties.number }} of {{ parties.paginator.num_pages }}
+        </span>
+
+        {% if parties.has_next %}
+          <a href="?page={{ parties.next_page_number }}&amp;{{ query }}">
+            Next
+          </a>
+
+          <a href="?page={{ parties.paginator.num_pages }}&amp;{{ query }}">
+            Last &raquo;
+          </a>
+        {% endif %}
+      </span>
+    </div>
+  </div>
+{% endblock %}

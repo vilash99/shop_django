@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+{% load static %}
+{% load humanize %}
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAEL - Print invoice</title>
+  <link rel="stylesheet" href="{% static 'css/print-style.css' %}">
+</head>
+<body onload="showDate()">
+
+  <div class="div-flex">
+    <div>
+      <div class="company-name">{{company.name}}</div>
+      <p>{{company.address}}</p>
+      <p>{{company.phone}}</p>
+      <p>{{company.reg_no}}</p>
+    </div>
+
+    <div class="company-logo">
+      <img src="{% static 'images/logo.jpeg' %}" alt="MAEL">
+    </div>
+  </div>
+
+  <h3 class="bill-title">Tax Invoice</h3>
+
+  <div class="div-flex">
+    <div class="party">
+      <table>
+        <tr>
+          <td>Bill to:</td>
+          <td>&nbsp;<b>{{bill.party.name}}</b></td>
+        </tr>
+        <tr>
+          <td>Address:</td>
+          <td>&nbsp;<b>{{bill.party.address}}</b></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="invoice">
+      <table>
+        <tr>
+          <td>Invoice No:</td>
+          <td>&nbsp;<b>{{bill.id}}</b></b></td>
+        </tr>
+        <tr>
+          <td>Bill Date:</td>
+          <td>&nbsp;<b>{{bill.bill_date|date:"d-m-Y"}}</b></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <tr>
+      <th style="text-align: left;">Item name</th>
+      <th class="right-field">Price/Unit</th>
+      <th>Quantity</th>
+      <th class="right-field">Amount</th>
+    </tr>
+    {% for trans in transactions %}
+      <tr>
+        <td class="name-cell">{{trans.item.name}}</td>
+        <td class="right-field">₹{{trans.price|intcomma}}.00</td>
+        <td class="center-field">
+          {% if trans.quantity == 0 %}
+            -
+          {% else %}
+            {{ trans.quantity }}
+          {% endif %}
+        </td>
+        <td class="right-field">₹{{trans.amount|intcomma}}.00</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <div class="div-flex">
+    <div class="left">
+      <p class="small-text" id="print-date"></p>
+    </div>
+    <div class="total-amount">
+      Total: <span>₹{{ net_total.amount__sum |intcomma}}.00</span>
+    </div>
+  </div>
+
+  <br>
+  <div class="div-flex">
+    <div class="small-text">
+      <p><b>Terms & Conditions</b></p>
+      <p>1. Goods once sold will not be taken back or exchanged.</p>
+      <p>2. Jobwork will not have any kind of guarantee and warranty.</p>
+    </div>
+    <div style="text-align: center;">
+      <p>___________________________</p>
+      <p><b>For Maharashtra Engineering</b></p>
+    </div>
+  </div>
+
+  <script>
+    function showDate() {
+      const now = new Date();
+      const currentDateTime = now.toLocaleString();
+      printDate = document.getElementById("print-date");
+      printDate.innerText = "Print date: " + currentDateTime;
+    }
+  </script>
+</body>
+</html>

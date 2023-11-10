@@ -1,0 +1,48 @@
+{% extends 'invoice/base.html' %}
+
+{% load static %}
+
+{% block title_block %}
+  Profile
+{% endblock %}
+
+{% block body_block %}
+  <div class="input-container">
+    <h3>Edit company details</h3>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="success-alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form id="form" method="post" action="{% url 'invoice:profile' %}">
+      {% csrf_token %}
+
+      {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <table class="input-table">
+        {% for field in form.visible_fields %}
+          {{ field.errors }}
+          <tr>
+            <td class="label">{{ field.label }}</td>
+            <td class="field">{{ field }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td></td>
+          <td class="right-align">
+            <button type="submit" class="btn btn-primary">
+              Save
+            </button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+{% endblock %}
