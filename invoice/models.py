@@ -37,13 +37,16 @@ class ItemService(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name_plural = 'Items & Services'
+
 
 class Sale(models.Model):
     bill_date = models.DateField(default=date.today)
     party = models.ForeignKey(Party, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.invoice_date)
+        return str(self.bill_date)
 
 
 class Transaction(models.Model):

@@ -37,6 +37,11 @@ a {
   display: inline-block;
 }
 
+img {
+  width: 100%;
+  display: block;
+}
+
 input, select {
   background-color: var(--clr-white);
   border: 1px solid #707070;
@@ -45,10 +50,6 @@ input, select {
   height: 30px;
   width: 100%;
   padding: 0 0.25rem;
-}
-
-img {
-  width: 100%;
 }
 
 .btn {

@@ -5,6 +5,8 @@ from django.views.generic import View, ListView
 from django.contrib import messages
 from django.db.models import Sum, F
 from django.core.paginator import Paginator
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 from invoice.models import Profile, Party, ItemService, Sale, Transaction
 from invoice.forms import (ProfileForm, PartyForm, ItemsForm, ServiceForm,
@@ -16,7 +18,7 @@ def index(request):
     return render(request, 'invoice/index.html')
 
 
-class ProfileView(View):
+class ProfileView(LoginRequiredMixin, View):
     template_name = 'invoice/profile.html'
 
     def get(self, request):
@@ -44,12 +46,12 @@ class ProfileView(View):
         return render(request, self.template_name, {'form': form})
 
 
-class PartiesView(ListView):
+class PartiesView(LoginRequiredMixin, ListView):
     """
     Add new party, and show all parties with all details.
     """
     model = Party
-    paginate_by = 100
+    paginate_by = 50
     template_name = 'invoice/parties.html'
 
     def querystring(self):
@@ -96,7 +98,7 @@ class PartiesView(ListView):
         return render(request, self.template_name, {'form': form})
 
 
-class PartyView(View):
+class PartyView(LoginRequiredMixin, View):
     """
     View and edit single party details
     """
@@ -132,12 +134,12 @@ class PartyView(View):
         return render(request, self.template_name, context=context_dict)
 
 
-class StockView(ListView):
+class StockView(LoginRequiredMixin, ListView):
     """
     Add new product, and show all products with all details.
     """
     model = ItemService
-    paginate_by = 100
+    paginate_by = 50
     template_name = 'invoice/stock.html'
 
     def querystring(self):
@@ -204,7 +206,7 @@ class StockView(ListView):
         return render(request, self.template_name, context=context_dict)
 
 
-class ItemView(View):
+class ItemView(LoginRequiredMixin, View):
     """
     View and edit single item/service details
     """
@@ -250,12 +252,12 @@ class ItemView(View):
         return render(request, self.template_name, context=context_dict)
 
 
-class InvoiceView(ListView):
+class InvoiceView(LoginRequiredMixin, ListView):
     """
     Create new invoice and show previous invoices
     """
     model = Sale
-    paginate_by = 100
+    paginate_by = 50
     template_name = 'invoice/invoice.html'
 
     def querystring(self):
@@ -314,7 +316,7 @@ class InvoiceView(ListView):
         return render(request, self.template_name, {'form': form})
 
 
-class TransactionView(View):
+class TransactionView(LoginRequiredMixin, View):
     """
     Create new invoice and show previous invoices
     """
@@ -382,6 +384,7 @@ class TransactionView(View):
         return render(request, self.template_name, context=context_dict)
 
 
+@login_required(login_url="/accounts/login/")
 def print_invoice(request, p_id):
     template_name = 'invoice/print-invoice.html'
 
@@ -452,3 +455,16 @@ def get_item_ajax(request):
         item_id = request.GET.get('item_id', '')
         data = get_object_or_404(ItemService, id=item_id)
     return JsonResponse({'price': data.price, 'quantity': data.quantity})
+
+
+class UserView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'invoice/admin/user.html')
+
+
+def error_500(request):
+    return render(request, 'invoice/error500.html')
+
+
+def error_404(request, exception):
+    return render(request, 'invoice/error404.html')

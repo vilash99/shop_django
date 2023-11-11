@@ -81,7 +81,7 @@ class InvoiceForm(forms.ModelForm):
         label='Invoice date'
     )
     party = forms.ModelChoiceField(
-        queryset=Party.objects.all(),
+        queryset=Party.objects.all().order_by('name'),
         label='Party name'
     )
 
@@ -92,7 +92,7 @@ class InvoiceForm(forms.ModelForm):
 
 class TransactionItemForm(forms.ModelForm):
     item = forms.ModelChoiceField(
-        queryset=ItemService.objects.filter(item_type=True),
+        queryset=ItemService.objects.filter(item_type=True).order_by('name'),
         label='Item name'
     )
     price = forms.IntegerField(initial=0, label='Price')
@@ -108,7 +108,7 @@ class TransactionItemForm(forms.ModelForm):
 
 class TransactionServiceForm(forms.ModelForm):
     item = forms.ModelChoiceField(
-        queryset=ItemService.objects.filter(item_type=False),
+        queryset=ItemService.objects.filter(item_type=False).order_by('name'),
         label='Service title',
     )
     amount = forms.IntegerField(initial=0, help_text='Amount')

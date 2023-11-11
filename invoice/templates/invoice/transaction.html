@@ -7,6 +7,11 @@
   Invoice Transaction
 {% endblock %}
 
+
+{% block css_block %}
+  <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
+{% endblock %}
+
 {% block body_block %}
   <div class="input-container">
     <h3>Add invoice items/services</h3>
@@ -146,7 +151,8 @@
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+  <script src="{% static 'js/select2.min.js' %}"></script>
 
   <script type='text/javascript'>
     $(document).ready(function() {
@@ -187,15 +193,15 @@
       }
 
       /// Fetch item price
-      $('#items #id_item').focusout(function () {
-        let id = $(this).find(":selected").val();
+      $('#items #id_item').change(function () {
+        let id = $(this).val();
         let price = $("#items #id_price");
         let quantity = $("#items #total-quantity");
         get_price(id, price, quantity);
       });
 
-      $('#services #id_item').focusout(function () {
-        let id = $(this).find(":selected").val();
+      $('#services #id_item').change(function () {
+        let id = $(this).val();
         let price = $("#services #id_amount");
         get_price(id, price);
       });
@@ -215,6 +221,15 @@
         calculate_amount();
       });
 
+      $("#items #id_item").select2( {
+        placeholder: "Select Item",
+        allowClear: true
+      });
+
+      $("#services #id_item").select2( {
+        placeholder: "Select Service",
+        allowClear: true
+      });
     });
   </script>
 
@@ -234,4 +249,5 @@
       evt.currentTarget.className += " active";
     }
   </script>
+
 {% endblock %}
