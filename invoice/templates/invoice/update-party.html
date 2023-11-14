@@ -8,7 +8,7 @@
   <div class="input-container">
     <h3>Edit party</h3>
 
-    <form id="party-form" action="{% url 'invoice:party' p_id %}" method="post">
+    <form id="party-form" action="" method="post">
       {% csrf_token %}
 
       {% for hidden in form.hidden_fields %}

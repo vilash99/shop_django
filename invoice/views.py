@@ -2,48 +2,27 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import View, ListView
+from django.views.generic.edit import UpdateView
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Sum, F
 from django.core.paginator import Paginator
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
 
 from invoice.models import Profile, Party, ItemService, Sale, Transaction
-from invoice.forms import (ProfileForm, PartyForm, ItemsForm, ServiceForm,
-                           InvoiceForm, TransactionItemForm,
-                           TransactionServiceForm)
+from invoice.forms import (PartyForm, ItemsForm, ServiceForm, InvoiceForm,
+                           TransactionItemForm, TransactionServiceForm)
 
 
 def index(request):
     return render(request, 'invoice/index.html')
 
 
-class ProfileView(LoginRequiredMixin, View):
+class ProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = Profile
     template_name = 'invoice/profile.html'
-
-    def get(self, request):
-        # Only one company with id 1
-        data = get_object_or_404(Profile, id=1)
-
-        # Pass company data to show on input fields
-        form = ProfileForm(instance=data)
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = ProfileForm(request.POST)
-
-        if form.is_valid():
-            data = get_object_or_404(Profile, id=1)
-            data.name = form.cleaned_data['name']
-            data.address = form.cleaned_data['address']
-            data.phone = form.cleaned_data['phone']
-            data.reg_no = form.cleaned_data['reg_no']
-            data.save()
-
-            messages.success(request, 'Company is updated successfully!')
-            return HttpResponseRedirect(request.path_info)
-
-        return render(request, self.template_name, {'form': form})
+    fields = ['name', 'phone', 'address', 'reg_no']
+    success_message = 'Company is updated successfully!'
 
 
 class PartiesView(LoginRequiredMixin, ListView):
@@ -98,40 +77,14 @@ class PartiesView(LoginRequiredMixin, ListView):
         return render(request, self.template_name, {'form': form})
 
 
-class PartyView(LoginRequiredMixin, View):
+class PartyView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     """
     View and edit single party details
     """
+    model = Party
     template_name = 'invoice/update-party.html'
-
-    def get(self, request, p_id):
-        data = get_object_or_404(Party, id=p_id)
-        form = PartyForm(instance=data)
-
-        context_dict = {}
-        context_dict['form'] = form
-        context_dict['p_id'] = p_id
-
-        return render(request, self.template_name, context=context_dict)
-
-    def post(self, request, p_id):
-        data = get_object_or_404(Party, id=p_id)
-
-        form = PartyForm(request.POST, instance=data)
-        context_dict = {}
-        context_dict['form'] = form
-        context_dict['p_id'] = p_id
-
-        if form.is_valid():
-            data.name = form.cleaned_data['name']
-            data.phone = form.cleaned_data['phone']
-            data.address = form.cleaned_data['address']
-            data.save()
-
-            messages.success(request, 'Party is updated successfully!')
-            return HttpResponseRedirect('/parties/')
-
-        return render(request, self.template_name, context=context_dict)
+    fields = ['name', 'phone', 'address']
+    success_message = 'Party is updated successfully!'
 
 
 class StockView(LoginRequiredMixin, ListView):
@@ -384,11 +337,10 @@ class TransactionView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=context_dict)
 
 
-@login_required(login_url="/accounts/login/")
-def print_invoice(request, p_id):
+class PrintInvoiceView(LoginRequiredMixin, View):
     template_name = 'invoice/print-invoice.html'
 
-    if request.method == 'GET':
+    def get(self, request, p_id):
         context_dict = {}
 
         # Get company profile
@@ -407,9 +359,7 @@ def print_invoice(request, p_id):
         net_total = transactions.aggregate(Sum('amount'))
         context_dict['net_total'] = net_total
 
-        # Convert total amount in words
-
-    return render(request, template_name, context=context_dict)
+        return render(request, self.template_name, context=context_dict)
 
 
 def delete_invoice_ajax(request):

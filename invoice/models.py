@@ -1,6 +1,6 @@
 from datetime import date
 from django.db import models
-from django.db.models import Sum
+from django.urls import reverse
 
 
 class Profile(models.Model):
@@ -11,6 +11,9 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('invoice:profile', kwargs={'pk': 1})
 
 
 class Party(models.Model):
@@ -23,6 +26,9 @@ class Party(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('invoice:parties')
 
 
 class ItemService(models.Model):

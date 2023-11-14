@@ -8,15 +8,15 @@ app_name = 'invoice'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('profile/<int:pk>/', views.ProfileView.as_view(), name='profile'),
     path('parties/', views.PartiesView.as_view(), name='parties'),
-    path('party/<int:p_id>/', views.PartyView.as_view(), name='party'),
+    path('party/<int:pk>/', views.PartyView.as_view(), name='party'),
     path('stock/', views.StockView.as_view(), name='stock'),
     path('item/<int:p_id>/', views.ItemView.as_view(), name='item'),
     path('invoice/', views.InvoiceView.as_view(), name='invoice'),
     path('invoice/<int:p_id>/', views.TransactionView.as_view(),
          name='transaction'),
-    path('print-invoice/<int:p_id>/', views.print_invoice,
+    path('print-invoice/<int:p_id>/', views.PrintInvoiceView.as_view(),
          name='print-invoice'),
 
     path('delete_invoice_ajax/', views.delete_invoice_ajax,

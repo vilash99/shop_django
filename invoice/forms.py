@@ -8,17 +8,6 @@ class UpperField(forms.CharField):
         return value.upper()
 
 
-class ProfileForm(forms.ModelForm):
-    name = forms.CharField(label='Company name')
-    phone = forms.CharField(label='Phone number')
-    address = forms.CharField(label='Address')
-    reg_no = forms.CharField(label='GST number')
-
-    class Meta:
-        model = Profile
-        exclude = ['id']
-
-
 class PartyForm(forms.ModelForm):
     name = UpperField(label='Party name')
     phone = forms.CharField(label='Phone')

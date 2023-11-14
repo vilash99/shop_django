@@ -26,7 +26,7 @@
         <a href="/invoice/" class="nav-link">New Invoice</a>
         <a href="/stock/" class="nav-link">Stocks</a>
         <a href="/parties/" class="nav-link">Parties</a>
-        <a href="/profile/" class="nav-link">Profile</a>
+        <a href="{% url 'invoice:profile' 1 %}" class="nav-link">Profile</a>
       </div>
     </div>
   </nav>
