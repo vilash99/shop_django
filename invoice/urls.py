@@ -25,8 +25,6 @@ urlpatterns = [
          name='delete_transaction_ajax'),
     path('get_item_ajax/', views.get_item_ajax, name='get_item_ajax'),
 
-    path('accounts/user/', views.UserView.as_view(), name="user"),
-
     path('favicon.ico', RedirectView.as_view(
         url=staticfiles_storage.url('images/favicon.ico'))),
 ]

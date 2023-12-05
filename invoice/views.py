@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import View, ListView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Sum, F
@@ -25,13 +25,16 @@ class ProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     success_message = 'Company is updated successfully!'
 
 
-class PartiesView(LoginRequiredMixin, ListView):
+class PartiesView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """
     Add new party, and show all parties with all details.
     """
     model = Party
-    paginate_by = 50
     template_name = 'invoice/parties.html'
+    form_class = PartyForm
+    success_message = 'Party is saved successfully!'
+    paginate_by = 50
+    page_kwarg = 'page'
 
     def querystring(self):
         qs = self.request.GET.copy()
@@ -40,41 +43,25 @@ class PartiesView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Show all transaction with total purchase for all parties
-        qs = super().get_queryset().annotate(
+        search_txt = self.request.GET.get('q', '')
+        qs = Party.objects.annotate(
             total_bill=Sum('sale__transaction__amount')
         )
-
-        search_txt = self.request.GET.get('q', '')
         qs = qs.filter(name__icontains=search_txt)
         return qs.order_by('name')
 
-    def get(self, request):
-        context_dict = {}
-
-        form = PartyForm()
-        context_dict['form'] = form
-
-        parties = self.get_queryset()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        party_list = self.get_queryset()
         query = self.querystring()
 
-        paginator = Paginator(parties, self.paginate_by)
-        page_number = request.GET.get('page', '')
-        parties = paginator.get_page(page_number)
+        paginator = Paginator(party_list, self.paginate_by)
+        page_number = self.request.GET.get('page', '')
+        party_list = paginator.get_page(page_number)
 
-        context_dict['parties'] = parties
-        context_dict['query'] = query
-
-        return render(request, self.template_name, context=context_dict)
-
-    def post(self, request):
-        form = PartyForm(request.POST)
-
-        if form.is_valid():
-            form.save(commit=True)
-            messages.success(request, 'Party is saved successfully!')
-            return HttpResponseRedirect(request.path_info)
-
-        return render(request, self.template_name, {'form': form})
+        context['party_list'] = party_list
+        context['query'] = query
+        return context
 
 
 class PartyView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -92,8 +79,8 @@ class StockView(LoginRequiredMixin, ListView):
     Add new product, and show all products with all details.
     """
     model = ItemService
-    paginate_by = 50
     template_name = 'invoice/stock.html'
+    paginate_by = 50
 
     def querystring(self):
         qs = self.request.GET.copy()
@@ -205,13 +192,15 @@ class ItemView(LoginRequiredMixin, View):
         return render(request, self.template_name, context=context_dict)
 
 
-class InvoiceView(LoginRequiredMixin, ListView):
+class InvoiceView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """
     Create new invoice and show previous invoices
     """
     model = Sale
-    paginate_by = 50
     template_name = 'invoice/invoice.html'
+    form_class = InvoiceForm
+    paginate_by = 50
+    page_kwarg = 'page'
 
     def querystring(self):
         qs = self.request.GET.copy()
@@ -220,13 +209,13 @@ class InvoiceView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Show all invoice with net total of each invoice
-        qs = super().get_queryset().annotate(
-            net_total=Sum('transaction__amount')
-        )
-
         from_date = self.request.GET.get('from-date', '')
         to_date = self.request.GET.get('to-date', '')
         search_party = self.request.GET.get('q', '')
+
+        qs = Sale.objects.annotate(
+            net_total=Sum('transaction__amount')
+        )
 
         if from_date and to_date:
             qs = qs.filter(bill_date__range=[from_date, to_date])
@@ -240,33 +229,20 @@ class InvoiceView(LoginRequiredMixin, ListView):
 
         return (qs.order_by('-bill_date'), net_total)
 
-    def get(self, request):
-        context_dict = {}
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-        form = InvoiceForm()
-        context_dict['form'] = form
-
-        invoices, net_total = self.get_queryset()
         query = self.querystring()
+        invoices, net_total = self.get_queryset()
 
         paginator = Paginator(invoices, self.paginate_by)
-        page_number = request.GET.get('page', '')
+        page_number = self.request.GET.get('page', '')
         invoices = paginator.get_page(page_number)
 
-        context_dict['invoices'] = invoices
-        context_dict['query'] = query
-        context_dict['net_total'] = net_total
-
-        return render(request, self.template_name, context=context_dict)
-
-    def post(self, request):
-        form = InvoiceForm(request.POST)
-
-        if form.is_valid():
-            tmp = form.save(commit=True)
-            return HttpResponseRedirect(f"/invoice/{str(tmp.id)}/")
-
-        return render(request, self.template_name, {'form': form})
+        context['invoices'] = invoices
+        context['query'] = query
+        context['net_total'] = net_total
+        return context
 
 
 class TransactionView(LoginRequiredMixin, View):
@@ -381,7 +357,7 @@ def delete_invoice_ajax(request):
 
 def delete_transaction_ajax(request):
     """
-    Delete transaction
+    Delete selected transaction
     """
     if request.method == 'GET':
         trans_id = request.GET.get('trans_id', '')
@@ -407,14 +383,15 @@ def get_item_ajax(request):
     return JsonResponse({'price': data.price, 'quantity': data.quantity})
 
 
-class UserView(LoginRequiredMixin, View):
-    def get(self, request):
-        return render(request, 'invoice/admin/user.html')
-
-
 def error_500(request):
+    """
+    Show 500 error page
+    """
     return render(request, 'invoice/error500.html')
 
 
 def error_404(request, exception):
+    """
+    Show 404 error page
+    """
     return render(request, 'invoice/error404.html')

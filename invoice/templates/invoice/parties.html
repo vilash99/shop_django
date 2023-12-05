@@ -1,4 +1,4 @@
-{% extends 'invoice/base.html' %}
+{% extends '_base.html' %}
 
 {% load static %}
 {% load humanize %}
@@ -19,7 +19,7 @@
       {% endfor %}
     {% endif %}
 
-    <form id="party-form" action="{% url 'invoice:parties' %}" method="post">
+    <form action="" method="post">
       {% csrf_token %}
 
       {% for hidden in form.hidden_fields %}
@@ -76,8 +76,8 @@
         <th></th>
       </tr>
 
-      {% if parties %}
-        {% for party in parties %}
+      {% if party_list %}
+        {% for party in party_list %}
           <tr>
             <td>{{ party.name }}</td>
             <td class="price-field">
@@ -101,24 +101,24 @@
 
     <div class="pagination">
       <span class="step-links">
-        {% if parties.has_previous %}
+        {% if party_list.has_previous %}
         <a href="?page=1&amp;{{ query }}">&laquo; First</a>
 
-        <a href="?page={{ parties.previous_page_number }}&amp;{{ query }}">
+        <a href="?page={{ party_list.previous_page_number }}&amp;{{ query }}">
           Previous
         </a>
         {% endif %}
 
         <span class="current">
-          Page {{ parties.number }} of {{ parties.paginator.num_pages }}
+          Page {{ party_list.number }} of {{ party_list.paginator.num_pages }}
         </span>
 
-        {% if parties.has_next %}
-          <a href="?page={{ parties.next_page_number }}&amp;{{ query }}">
+        {% if party_list.has_next %}
+          <a href="?page={{ party_list.next_page_number }}&amp;{{ query }}">
             Next
           </a>
 
-          <a href="?page={{ parties.paginator.num_pages }}&amp;{{ query }}">
+          <a href="?page={{ party_list.paginator.num_pages }}&amp;{{ query }}">
             Last &raquo;
           </a>
         {% endif %}

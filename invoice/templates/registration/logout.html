@@ -1,15 +1,19 @@
-{% extends 'invoice/base.html' %}
+{% extends '_base.html' %}
 
 {% load static %}
 
 {% block title_block %}
-  User
+  Logout
 {% endblock %}
 
 {% block body_block %}
   <div class="input-container">
-    <a class="anchor-btn" href="/">
-      Home
+    <h3>You have been logged out</h3>
+    <a class="anchor-btn" href="/accounts/login">
+      Login
     </a>
   </div>
 {% endblock %}
+
+
+

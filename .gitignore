@@ -1,5 +1,12 @@
+# Virtual Environment
+.venv/
+
+# Environment variable
+.env
+
+__pycache__/
+
 # database
 *.sqlite3
 
 credentials.txt
-.venv/

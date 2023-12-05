@@ -1,6 +1,6 @@
 from datetime import date
 from django import forms
-from invoice.models import Profile, Party, ItemService, Sale, Transaction
+from invoice.models import Party, ItemService, Sale, Transaction
 
 
 class UpperField(forms.CharField):

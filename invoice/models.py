@@ -54,6 +54,9 @@ class Sale(models.Model):
     def __str__(self):
         return str(self.bill_date)
 
+    def get_absolute_url(self):
+        return f"/invoice/{self.pk}"
+
 
 class Transaction(models.Model):
     sales = models.ForeignKey(Sale, on_delete=models.CASCADE)
