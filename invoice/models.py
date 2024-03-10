@@ -55,7 +55,7 @@ class Sale(models.Model):
         return str(self.bill_date)
 
     def get_absolute_url(self):
-        return f"/invoice/{self.pk}"
+        return f"/invoice/{self.pk}/"
 
 
 class Transaction(models.Model):
