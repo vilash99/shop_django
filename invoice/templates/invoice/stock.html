@@ -32,7 +32,7 @@
       {% csrf_token %}
 
       {% for hidden in item_form.hidden_fields %}
-        {{ hidden }}
+	      {{ hidden }}
       {% endfor %}
 
       <table class="input-table">
@@ -58,7 +58,7 @@
       {% csrf_token %}
 
       {% for hidden in service_form.hidden_fields %}
-        {{ hidden }}
+	      {{ hidden }}
       {% endfor %}
 
       <table class="input-table">
@@ -112,54 +112,28 @@
         <th></th>
       </tr>
 
-      {% if stocks %}
-        {% for item in stocks %}
-          <tr>
-            <td>{{ item.name }}</td>
-            {% if item.item_type %}
-              <td class="center-field">{{ item.quantity }}</td>
-              <td>₹{{ item.price|intcomma }}.00</td>
-              <td>ITEMS</td>
-            {% else %}
-              <td class="center-field">-</td>
-              <td>₹{{ item.price|intcomma }}.00</td>
-              <td>SERVICES</td>
-            {% endif %}
-            <td class="center-field">
-              <a class="icon-edit" href="{% url 'invoice:item' item.id %}">
-                <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
-              </a>
-            </td>
-          </tr>
-        {% endfor %}
-      {% endif %}
+      {% for item in page_obj %}
+        <tr>
+          <td>{{ item.name }}</td>
+          {% if item.item_type %}
+            <td class="center-field">{{ item.quantity }}</td>
+            <td>₹ {{ item.price|intcomma }}.00</td>
+            <td>ITEMS</td>
+          {% else %}
+            <td class="center-field">-</td>
+            <td>₹ {{ item.price|intcomma }}.00</td>
+            <td>SERVICES</td>
+          {% endif %}
+          <td class="center-field">
+            <a class="icon-edit" href="{% url 'invoice:item' item.id %}">
+              <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
     </table>
 
-    <div class="pagination">
-      <span class="step-links">
-        {% if stocks.has_previous %}
-        <a href="?page=1&amp;{{ query }}">&laquo; First</a>
-
-        <a href="?page={{ stocks.previous_page_number }}&amp;{{ query }}">
-          Previous
-        </a>
-        {% endif %}
-
-        <span class="current">
-          Page {{ stocks.number }} of {{ stocks.paginator.num_pages }}
-        </span>
-
-        {% if stocks.has_next %}
-          <a href="?page={{ stocks.next_page_number }}&amp;{{ query }}">
-            Next
-          </a>
-
-          <a href="?page={{ stocks.paginator.num_pages }}&amp;{{ query }}">
-            Last &raquo;
-          </a>
-        {% endif %}
-      </span>
-    </div>
+    {% include "includes/pagination.html" %}
   </div>
 
   <script>

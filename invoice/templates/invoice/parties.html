@@ -23,7 +23,7 @@
       {% csrf_token %}
 
       {% for hidden in form.hidden_fields %}
-        {{ hidden }}
+	      {{ hidden }}
       {% endfor %}
 
       <table class="input-table">
@@ -51,12 +51,7 @@
       <form class="flex-contents" id="search" method="get" action="{% url 'invoice:parties' %}">
         <div class="search-field">
           <label for="from-date">Search party name</label>
-          <input
-            id="search-text"
-            type="text"
-            name="q"
-            placeholder="Party name"
-          />
+          <input id="search-text" type="text" name="q" placeholder="Party name"/>
         </div>
         <div class="search-field">
           <p>&nbsp;</p>
@@ -76,53 +71,25 @@
         <th></th>
       </tr>
 
-      {% if party_list %}
-        {% for party in party_list %}
-          <tr>
-            <td>{{ party.name }}</td>
-            <td class="price-field">
-              {% if party.total_bill %}
-                ₹{{ party.total_bill|intcomma }}.00
-              {% else %}
-                ₹0.00
-              {% endif %}
-            </td>
-            <td>{{ party.phone }}</td>
-            <td>{{ party.address }}</td>
-            <td class="center-field">
-              <a class="icon-edit" href="{% url 'invoice:party' party.id %}">
-                <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
-              </a>
-            </td>
-          </tr>
-        {% endfor %}
-      {% endif %}
+      {% for party in page_obj %}
+        <tr>
+          <td>{{ party.name }}</td>
+          <td class="price-field">₹ {{ party.total_bill|default:0|intcomma }}.00</td>
+          <td>{{ party.phone }}</td>
+          <td>{{ party.address }}</td>
+          <td class="center-field">
+            <a class="icon-edit" href="{% url 'invoice:party' party.id %}">
+              <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
+            </a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="center-field">No parties found.</td>
+        </tr>
+      {% endfor %}
     </table>
 
-    <div class="pagination">
-      <span class="step-links">
-        {% if party_list.has_previous %}
-        <a href="?page=1&amp;{{ query }}">&laquo; First</a>
-
-        <a href="?page={{ party_list.previous_page_number }}&amp;{{ query }}">
-          Previous
-        </a>
-        {% endif %}
-
-        <span class="current">
-          Page {{ party_list.number }} of {{ party_list.paginator.num_pages }}
-        </span>
-
-        {% if party_list.has_next %}
-          <a href="?page={{ party_list.next_page_number }}&amp;{{ query }}">
-            Next
-          </a>
-
-          <a href="?page={{ party_list.paginator.num_pages }}&amp;{{ query }}">
-            Last &raquo;
-          </a>
-        {% endif %}
-      </span>
-    </div>
+    {% include "includes/pagination.html" %}
   </div>
 {% endblock %}

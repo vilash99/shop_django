@@ -21,7 +21,7 @@
       {% csrf_token %}
 
       {% for hidden in form.hidden_fields %}
-        {{ hidden }}
+	      {{ hidden }}
       {% endfor %}
 
       <table class="input-table">
@@ -29,15 +29,15 @@
           {{ field.errors }}
           <tr>
             <td class="label">{{ field.label }}</td>
-            <td class="field">{{ field }}</td>
+            <td class="field">
+              {{ field }}
+            </td>
           </tr>
         {% endfor %}
         <tr>
           <td></td>
           <td class="right-align">
-            <button type="submit" class="btn btn-primary">
-              Continue
-            </button>
+            <button type="submit" class="btn btn-primary">Continue</button>
           </td>
         </tr>
       </table>
@@ -51,22 +51,12 @@
       <form class="flex-contents" id="frmdate" method="get" action="{% url 'invoice:invoice' %}">
         <div class="search-field">
           <label for="from-date">Show invoice from</label>
-          <input
-            id="from-date"
-            type="date"
-            name="from-date"
-            placeholder="dd-mm-yyyy"
-          />
+          <input id="from-date" type="date" name="from-date" placeholder="dd-mm-yyyy"/>
         </div>
 
         <div class="search-field">
           <label for="to-date">To date</label>
-          <input
-            id="to-date"
-            type="date"
-            name="to-date"
-            placeholder="dd-mm-yyyy"
-          />
+          <input id="to-date" type="date" name="to-date" placeholder="dd-mm-yyyy"/>
         </div>
 
         <div class="search-field">
@@ -80,12 +70,7 @@
       <form class="flex-contents" id="frmname" method="get" action="{% url 'invoice:invoice' %}">
         <div class="search-field">
           <label for="search_party">Party name</label>
-          <input
-            id="party-search"
-            type="text"
-            name="q"
-            placeholder="Party name"
-          />
+          <input id="party-search" type="text" name="q" placeholder="Party name"/>
         </div>
 
         <div class="search-field">
@@ -102,22 +87,14 @@
         <th>Date</th>
         <th>Party</th>
         <th>Bill Total</th>
-        <th></th>
-        <th></th>
-        <th></th>
+        <th colspan="3"></th>
       </tr>
 
-      {% for invoice in invoices %}
+      {% for invoice in page_obj %}
         <tr>
           <td>{{ invoice.bill_date|date:"d-m-Y" }}</td>
           <td>{{ invoice.party.name }}</td>
-          <td class="price-field">
-            {% if invoice.net_total %}
-              ₹{{ invoice.net_total|intcomma }}.00
-            {% else %}
-              ₹0.00
-            {% endif %}
-          </td>
+          <td class="price-field">₹ {{ invoice.net_total|default:0|intcomma }}.00</td>
 
           <td class="center-field">
             <a class="icon-edit" href="{% url 'invoice:transaction' invoice.id %}">
@@ -135,37 +112,19 @@
             </a>
           </td>
         </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="center-field">No invoice found.</td>
+        </tr>
       {% endfor %}
     </table>
 
     <div class="total-field">
       Total sales:
-      <span class="total-value">
-        ₹{{ net_total.net_total__sum|intcomma }}.00
-      </span>
+      <span class="total-value">₹ {{ net_total|default:0|intcomma }}.00</span>
     </div>
 
-    <div class="pagination">
-      {% if invoices.has_previous %}
-      <a href="?page=1&amp;{{ query }}">&laquo; First</a>
-      <a href="?page={{ invoices.previous_page_number }}&amp;{{ query }}">
-        Previous
-      </a>
-      {% endif %}
-
-      <span class="current">
-        Page {{ invoices.number }} of {{ invoices.paginator.num_pages }}
-      </span>
-
-      {% if invoices.has_next %}
-      <a href="?page={{ invoices.next_page_number }}&amp;{{ query }}">
-        Next
-      </a>
-      <a href="?page={{ invoices.paginator.num_pages }}&amp;{{ query }}">
-        Last &raquo;
-      </a>
-      {% endif %}
-    </div>
+    {% include "includes/pagination.html" %}
   </div>
 
   <script type='text/javascript'>
@@ -174,13 +133,11 @@
       $('.icon-delete').on('click', function() {
         if (confirm('Are you sure to delete?')) {
           let invoiceId = $(this).attr("invoice-id");
-          if (invoiceId != "") {
+          if (invoiceId) {
             $.ajax({
               url: "{% url 'invoice:delete_invoice_ajax' %}",
               type: "GET",
-              data: {
-                invoice_id: invoiceId,
-              },
+              data: {invoice_id: invoiceId},
             }).done(function (response) {
               if(response.result == "failed") {
                 alert("Please delete all transaction of selected invoice before delete!");

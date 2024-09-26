@@ -43,7 +43,7 @@
       {% csrf_token %}
 
       {% for hidden in item_form.hidden_fields %}
-        {{ hidden }}
+	      {{ hidden }}
       {% endfor %}
 
       <table class="input-table">
@@ -78,7 +78,7 @@
       {% csrf_token %}
 
       {% for hidden in service_form.hidden_fields %}
-        {{ hidden }}
+	      {{ hidden }}
       {% endfor %}
 
       <table class="input-table">
@@ -125,7 +125,7 @@
       {% for trans in transactions %}
         <tr>
           <td>{{ trans.item.name }}</td>
-          <td>₹{{ trans.price|intcomma }}.00</td>
+          <td>₹ {{ trans.price|intcomma }}.00</td>
           <td class="center-field">
             {% if trans.quantity == 0 %}
               -
@@ -133,7 +133,7 @@
               {{ trans.quantity }}
             {% endif %}
           </td>
-          <td class="price-field">₹{{ trans.amount|intcomma }}.00</td>
+          <td class="price-field">₹ {{ trans.amount|intcomma }}.00</td>
           <td class="center-field">
             <a class="icon-delete" trans-id="{{trans.id}}">
               <img src="{% static 'images/icon-delete.png' %}" alt="Delete">
@@ -144,10 +144,8 @@
     </table>
 
     <div class="total-field">
-      Total sales:
-      <span class="total-value">
-        ₹{{ net_total.amount__sum|intcomma }}.00
-      </span>
+      Bill amount:
+      <span class="total-value">₹ {{ net_total|default:0|intcomma }}.00</span>
     </div>
   </div>
 

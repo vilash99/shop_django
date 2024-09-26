@@ -65,7 +65,7 @@
     {% for trans in transactions %}
       <tr>
         <td class="name-cell">{{trans.item.name}}</td>
-        <td class="right-field">₹{{trans.price|intcomma}}.00</td>
+        <td class="right-field">₹ {{trans.price|intcomma}}.00</td>
         <td class="center-field">
           {% if trans.quantity == 0 %}
             -
@@ -73,7 +73,7 @@
             {{ trans.quantity }}
           {% endif %}
         </td>
-        <td class="right-field">₹{{trans.amount|intcomma}}.00</td>
+        <td class="right-field">₹ {{trans.amount|intcomma}}.00</td>
       </tr>
     {% endfor %}
   </table>
@@ -83,7 +83,7 @@
       <p class="small-text" id="print-date"></p>
     </div>
     <div class="total-amount">
-      Total: <span>₹{{ net_total.amount__sum |intcomma}}.00</span>
+      Total: <span>₹ {{ net_total|default:0|intcomma }}.00</span>
     </div>
   </div>
 
