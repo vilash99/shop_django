@@ -10,3 +10,6 @@ __pycache__/
 *.sqlite3
 
 credentials.txt
+
+# Admin CSS
+static/admin/
