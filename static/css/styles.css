@@ -1,6 +1,6 @@
 :root {
   --clr-primary: #222831;
-  --clr-secondary: #00adB5;
+  --clr-secondary: #cf0909;
   --clr-green: #609966;
   --clr-light-gray: #eeeeee;
   --clr-white: #fff;
@@ -20,7 +20,7 @@
 }
 
 body {
-  background-color: #F2FAFB;
+  background-color: #d1d1d1;
   color: var(--clr-black);
   font-family: var(--ff-primary);
   font-size: 1rem;
