@@ -373,13 +373,3 @@ footer {
 .center-container h1 {
   font-size: 4rem;
 }
-
-.text-link {
-  color: var(--clr-black);
-  text-decoration: none;
-}
-
-.text-link:hover {
-  text-decoration: underline;
-  color: #0404e4;
-}

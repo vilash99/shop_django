@@ -102,28 +102,27 @@
     <table class="data-table">
       <tr>
         <th>Name</th>
-        <th>Quantity</th>
         <th>Price</th>
+        <th>Discount %</th>
+        <th>Available<br>Quantity</th>
         <th>Type</th>
         <th></th>
       </tr>
 
       {% for item in page_obj %}
         <tr>
-          <td>
-            <a class="text-link" href="{% url 'invoice:item_detail' item.id %}">
-              {{ item.name }}
-            </a>
-          </td>
+          <td>{{ item.name }}</td>
+          <td>₹ {{ item.price|intcomma }}.00</td>
+          <td>{{ item.discount }} %</td>
+
           {% if item.item_type %}
             <td class="center-field">{{ item.quantity }}</td>
-            <td>₹ {{ item.price|intcomma }}.00</td>
-            <td>ITEMS</td>
+            <td>ITEM</td>
           {% else %}
             <td class="center-field">-</td>
-            <td>₹ {{ item.price|intcomma }}.00</td>
-            <td>SERVICES</td>
+            <td>SERVICE</td>
           {% endif %}
+
           <td class="center-field">
             <a class="icon-edit" href="{% url 'invoice:item_detail' item.id %}">
               <img src="{% static 'images/icon-edit.png' %}" alt="Edit">

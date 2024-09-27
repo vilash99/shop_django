@@ -73,11 +73,7 @@
 
     {% for transaction in page_obj %}
       <tr>
-        <td>
-          <a class="text-link" href="{% url 'invoice:balance_payment_update' transaction.id %}">
-            {{ transaction.pay_date }}
-          </a>
-        </td>
+        <td>{{ transaction.pay_date }}</td>
         <td class="price-field">₹ {{ transaction.amount|default:0|intcomma }}.00</td>
         <td class="center-field">
           <a class="icon-edit" href="{% url 'invoice:balance_payment_update' transaction.id %}">
