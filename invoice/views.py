@@ -10,20 +10,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-from invoice.models import Profile, Party, ItemService, Sale, Transaction
+from invoice.models import (
+    Profile, Party, ItemService, Sale, Transaction, PartyBalance
+)
 from invoice.forms import (
     PartyForm, ItemsForm, ServiceForm, InvoiceForm,
-    TransactionItemForm, TransactionServiceForm
+    TransactionItemForm, TransactionServiceForm, PartyBalanceForm
 )
 
 
 def index(request):
-    return render(request, 'invoice/index.html')
+    return render(request, 'common/index.html')
 
 
 class ProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Profile
-    template_name = 'invoice/profile.html'
+    template_name = 'common/profile.html'
     fields = ['name', 'phone', 'address', 'reg_no']
     success_message = 'Company updated successfully!'
 
@@ -33,7 +35,7 @@ class PartiesView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     Show Parties details with total billed for all invoices
     """
     model = Party
-    template_name = 'invoice/parties.html'
+    template_name = 'party/parties.html'
     form_class = PartyForm
     success_message = 'New Party saved successfully!'
     paginate_by = 50
@@ -70,14 +72,85 @@ class PartiesView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
 
-class PartyView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class SinglePartyView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     """
-    View and edit single party details
+    View and edit single party details and display related transactions.
     """
     model = Party
-    template_name = 'invoice/update-party.html'
+    template_name = 'party/update-party.html'
     fields = ['name', 'phone', 'address']
     success_message = 'Party updated successfully!'
+    paginate_by = 50
+    page_kwarg = 'page'
+
+    def querystring(self):
+        qs = self.request.GET.copy()
+        qs.pop(self.page_kwarg, None)
+        return qs.urlencode()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        party = self.get_object()
+        transactions = PartyBalance.objects.filter(party=party).order_by('-pay_date')
+
+        paginator = Paginator(transactions, self.paginate_by)
+        page_number = self.request.GET.get(self.page_kwarg, 1)
+        transactions_page = paginator.get_page(page_number)
+
+        query = self.querystring()
+
+        context.update({
+            'page_obj': transactions_page,
+            'party': party,
+            'query': query,
+        })
+        return context
+
+
+class PartyBalanceView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+    """
+    Add new balance entry for a party and show all balances for parties.
+    """
+    model = PartyBalance
+    template_name = 'party/balance_payment.html'
+    form_class = PartyBalanceForm
+    success_message = 'Party balance is saved successfully!'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Get the party instance based on the URL parameter
+        party = get_object_or_404(Party, pk=self.kwargs['pk'])
+        # Pass the party instance to the form
+        kwargs['party'] = party
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'party_id': self.kwargs['pk'],
+        })
+        return context
+
+
+class PartyBalanceUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    """
+    Update an existing balance entry for a party.
+    """
+    model = PartyBalance
+    form_class = PartyBalanceForm
+    template_name = 'party/update_balance_payment.html'
+    success_message = 'Party balance has been updated successfully!'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'party_id': self.object.party.pk,
+        })
+        return context
+
+    def get_success_url(self):
+        return f"/party/{self.object.party.pk}/"
 
 
 class StockView(LoginRequiredMixin, ListView):
@@ -85,7 +158,7 @@ class StockView(LoginRequiredMixin, ListView):
     Add new product, and show all products with all details.
     """
     model = ItemService
-    template_name = 'invoice/stock.html'
+    template_name = 'stock/new-item-stock-list.html'
     paginate_by = 50
     page_kwarg = 'page'
 
@@ -145,7 +218,7 @@ class ItemView(LoginRequiredMixin, View):
     """
     View and edit single item/service details
     """
-    template_name = 'invoice/update-item.html'
+    template_name = 'stock/update-item.html'
 
     def get(self, request, p_id):
         data = get_object_or_404(ItemService, id=p_id)
@@ -349,16 +422,28 @@ def get_item_ajax(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+@method_decorator(csrf_exempt, name='dispatch')
+def delete_balance_payment_ajax(request):
+    """
+    Delete selected payment balance payment transaction
+    """
+    if request.method == 'GET':
+        transaction_id = request.GET.get('transaction_id', '')
+        transaction = get_object_or_404(PartyBalance, id=transaction_id)
+        transaction.delete()
+        result = "success"
+
+    return JsonResponse({'result': result})
 
 def error_500(request):
     """
     Show 500 error page
     """
-    return render(request, 'invoice/error500.html')
+    return render(request, 'common/error500.html')
 
 
 def error_404(request, exception):
     """
     Show 404 error page
     """
-    return render(request, 'invoice/error404.html')
+    return render(request, 'common/error404.html')

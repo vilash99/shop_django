@@ -6,6 +6,7 @@
   --clr-white: #fff;
   --clr-black: #000;
   --clr-success: #d4edda;
+  --clr-danger: #eb0c0c;
 
   --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   --border-radius: 0.3rem;
@@ -208,7 +209,7 @@ footer {
 }
 
 .display-container {
-  width: 840px;
+  width: 990px;
 }
 
 .input-table {
@@ -246,6 +247,7 @@ footer {
   flex-direction: column;
 }
 
+
 .data-table {
   margin: 1.5rem 0;
   width: 100%;
@@ -267,8 +269,13 @@ footer {
   text-align: center;
 }
 
-.data-table .price-field {
+.price-field {
   color: var(--clr-green);
+  font-weight: bold;
+}
+
+.negative-price {
+  color: var(--clr-danger);
   font-weight: bold;
 }
 
@@ -365,4 +372,14 @@ footer {
 
 .center-container h1 {
   font-size: 4rem;
+}
+
+.text-link {
+  color: var(--clr-black);
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+  color: #0404e4;
 }

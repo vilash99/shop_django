@@ -82,17 +82,13 @@
   </div>
 
   <div class="display-container">
-    <h3>Available stock</h3>
+    <h3>Available Stock</h3>
 
     <div class="search-form">
       <form class="flex-contents" id="search" method="get" action="{% url 'invoice:stock' %}">
         <div class="search-field">
           <label for="search-text">Search items/services</label>
-          <input
-            id="search-text"
-            type="text"
-            name="q"
-            placeholder="Item or service"/>
+          <input id="search-text" type="text" name="q" placeholder="Item or service"/>
         </div>
         <div class="search-field">
           <p>&nbsp;</p>
@@ -114,7 +110,11 @@
 
       {% for item in page_obj %}
         <tr>
-          <td>{{ item.name }}</td>
+          <td>
+            <a class="text-link" href="{% url 'invoice:item_detail' item.id %}">
+              {{ item.name }}
+            </a>
+          </td>
           {% if item.item_type %}
             <td class="center-field">{{ item.quantity }}</td>
             <td>₹ {{ item.price|intcomma }}.00</td>
@@ -125,7 +125,7 @@
             <td>SERVICES</td>
           {% endif %}
           <td class="center-field">
-            <a class="icon-edit" href="{% url 'invoice:item' item.id %}">
+            <a class="icon-edit" href="{% url 'invoice:item_detail' item.id %}">
               <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
             </a>
           </td>

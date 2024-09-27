@@ -39,7 +39,7 @@
       </button>
     </div>
 
-    <form id="items" class="tab-content active" action="{% url 'invoice:transaction' p_id %}" method="post">
+    <form id="items" class="tab-content active" action="{% url 'invoice:transaction_detail' p_id %}" method="post">
       {% csrf_token %}
 
       {% for hidden in item_form.hidden_fields %}
@@ -61,7 +61,7 @@
         {% endfor %}
         <tr>
           <td>
-            <a class="anchor-btn" href="{% url 'invoice:invoice' %}">
+            <a class="anchor-btn" href="{% url 'invoice:invoice_list' %}">
               Back
             </a>
           </td>
@@ -74,7 +74,7 @@
       </table>
     </form>
 
-    <form id="services" class="tab-content" action="{% url 'invoice:transaction' p_id %}" method="post">
+    <form id="services" class="tab-content" action="{% url 'invoice:transaction_detail' p_id %}" method="post">
       {% csrf_token %}
 
       {% for hidden in service_form.hidden_fields %}
@@ -92,7 +92,7 @@
 
         <tr>
           <td>
-            <a class="anchor-btn" href="{% url 'invoice:invoice' %}">
+            <a class="anchor-btn" href="{% url 'invoice:invoice_list' %}">
               Back
             </a>
           </td>
@@ -109,7 +109,7 @@
     <div class="heading-flex">
       <h3>All Transactions</h3>
 
-      <a class="icon-print" href="{% url 'invoice:print-invoice' p_id %}" target="_blank">
+      <a class="icon-print" href="{% url 'invoice:print_invoice' p_id %}" target="_blank">
         <img src="{% static 'images/icon-print.png' %}" alt="Print">
       </a>
     </div>

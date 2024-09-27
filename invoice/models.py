@@ -33,6 +33,18 @@ class Party(models.Model):
         return reverse('invoice:parties')
 
 
+class PartyBalance(models.Model):
+    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name="balances")
+    pay_date = models.DateField(default=date.today, verbose_name="Payment Date")
+    amount = models.IntegerField(default=0)
+
+    def __str__(self):
+        return "{} - {} on {}".format(self.party.name, self.amount, self.pay_date)
+
+    def get_absolute_url(self):
+        return reverse('invoice:party_detail', kwargs={'pk': self.party.pk})
+
+
 class ItemService(models.Model):
     ITEM = True
     SERVICE = False
@@ -80,10 +92,6 @@ class Transaction(models.Model):
         return "Item" if self.item.item_type else "Service"
 
 
-class PartyBalance(models.Model):
-    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name="balances")
-    pay_date = models.DateField(default=date.today, verbose_name="Payment Date")
-    amount = models.IntegerField(default=0)
 
-    def __str__(self):
-        return "{} - {} on {}".format(self.party.name, self.amount, self.pay_date)
+
+

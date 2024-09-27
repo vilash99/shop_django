@@ -1,0 +1,126 @@
+{% extends '_base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block title_block %}
+  Update Party
+{% endblock %}
+
+{% block body_block %}
+<div class="input-container">
+  <h3>Update Party/Customer Details</h3>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="success-alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form id="party-form" action="" method="post">
+    {% csrf_token %}
+
+    {% for hidden in form.hidden_fields %}
+      {{ hidden }}
+    {% endfor %}
+
+    <table class="input-table">
+      {% for field in form.visible_fields %}
+        {{ field.errors }}
+        <tr>
+          <td class="label">{{ field.label }}</td>
+          <td class="field">{{ field }}</td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <td class="label">Balance</td>
+        <td class="{% if party.balance_amount < 0 %}negative-price{% else %}price-field{% endif %}">
+          ₹ {{ party.balance_amount|default:0|intcomma }}.00
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <a class="anchor-btn" href="{% url 'invoice:parties' %}">
+            Back
+          </a>
+        </td>
+        <td class="right-align">
+          <button type="submit" class="btn btn-primary">
+            Save
+          </button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<div class="display-container">
+  <h3>Balance Paid History</h3>
+
+  <a class="btn btn-primary" href="{% url 'invoice:party_balance_payment' party.id %}">
+    Pay Balance
+  </a>
+
+  <table class="data-table">
+    <tr>
+      <th>Date</th>
+      <th>Paid Amount</th>
+      <th colspan="2"></th>
+    </tr>
+
+    {% for transaction in page_obj %}
+      <tr>
+        <td>
+          <a class="text-link" href="{% url 'invoice:balance_payment_update' transaction.id %}">
+            {{ transaction.pay_date }}
+          </a>
+        </td>
+        <td class="price-field">₹ {{ transaction.amount|default:0|intcomma }}.00</td>
+        <td class="center-field">
+          <a class="icon-edit" href="{% url 'invoice:balance_payment_update' transaction.id %}">
+            <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
+          </a>
+        </td>
+          <td class="center-field">
+            <a class="icon-delete" transaction-id="{{transaction.id}}">
+              <img src="{% static 'images/icon-delete.png' %}" alt="Delete">
+            </a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="4" class="center-field">No transaction found.</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  {% include "includes/pagination.html" %}
+</div>
+
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+
+<script type='text/javascript'>
+  $(document).ready(function() {
+    // Delete transaction
+    $('.icon-delete').on('click', function() {
+      if (confirm('Are you sure to delete?')) {
+        let transaction_id = $(this).attr("transaction-id");
+        if (transaction_id) {
+          $.ajax({
+            url: "{% url 'invoice:delete_balance_payment_ajax' %}",
+            type: "GET",
+            data: {
+              transaction_id: transaction_id,
+            },
+          }).done(function (response) {
+            location.reload();
+          });
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -14,15 +14,10 @@ class PartyForm(forms.ModelForm):
     name = UpperField(label='Party name')
     phone = forms.CharField(label='Phone')
     address = forms.CharField(label='Address')
-    balance_amount = forms.IntegerField(
-        initial=0,
-        widget=forms.NumberInput(attrs={'min': 0}),
-        label='Balance Amount'
-    )
 
     class Meta:
         model = Party
-        exclude = ['id']
+        exclude = ['id', 'balance_amount']
 
     def clean_name(self):
         """Check for same name for other ids"""
@@ -121,10 +116,6 @@ class TransactionServiceForm(forms.ModelForm):
 
 
 class PartyBalanceForm(forms.ModelForm):
-    party = forms.ModelChoiceField(
-        queryset=Party.objects.all().order_by('name'),
-        label='Party Name'
-    )
     pay_date = forms.DateField(
         initial=date.today,
         widget=forms.DateInput(attrs={'type': 'date'}),
@@ -138,7 +129,21 @@ class PartyBalanceForm(forms.ModelForm):
 
     class Meta:
         model = PartyBalance
-        exclude = ['id']
+        exclude = ['id', 'party']  # Exclude party since we will set it manually
+
+    def __init__(self, *args, **kwargs):
+        # Capture the `party` instance passed from the view
+        self.party = kwargs.pop('party', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        # Create an instance of PartyBalance but do not save to the database yet
+        instance = super().save(commit=False)
+        if self.party:
+            instance.party = self.party  # Manually set the party
+        if commit:
+            instance.save()
+        return instance
 
     def clean_amount(self):
         """Ensure that the amount is a positive value."""

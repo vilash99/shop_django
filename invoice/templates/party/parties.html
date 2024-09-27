@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load humanize %}
+{% load custom_filters %}
 
 {% block title_block %}
   Parties
@@ -9,7 +10,7 @@
 
 {% block body_block %}
   <div class="input-container">
-    <h3>New party</h3>
+    <h3>New Party/Customer Entry</h3>
 
     {% if messages %}
       {% for message in messages %}
@@ -47,6 +48,8 @@
   </div>
 
   <div class="display-container">
+    <h3>All Customers/Parties</h3>
+
     <div class="search-form">
       <form class="flex-contents" id="search" method="get" action="{% url 'invoice:parties' %}">
         <div class="search-field">
@@ -66,6 +69,7 @@
       <tr>
         <th>Name</th>
         <th>Total bill</th>
+        <th>Balance</th>
         <th>Phone</th>
         <th>Address</th>
         <th></th>
@@ -73,12 +77,21 @@
 
       {% for party in page_obj %}
         <tr>
-          <td>{{ party.name }}</td>
+          <td>
+            <a class="text-link" href="{% url 'invoice:party_detail' party.id %}">
+              {{ party.name }}
+            </a>
+          </td>
           <td class="price-field">₹ {{ party.total_bill|default:0|intcomma }}.00</td>
+
+          <td class="{% if party.balance_amount < 0 %}negative-price{% else %}price-field{% endif %}">
+            ₹ {{ party.balance_amount|default:0|intcomma }}.00
+          </td>
+
           <td>{{ party.phone }}</td>
-          <td>{{ party.address }}</td>
+          <td>{{ party.address|first_word }}</td>
           <td class="center-field">
-            <a class="icon-edit" href="{% url 'invoice:party' party.id %}">
+            <a class="icon-edit" href="{% url 'invoice:party_detail' party.id %}">
               <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
             </a>
           </td>

@@ -1,0 +1,44 @@
+{% extends '_base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block title_block %}
+  Update Balance Payment
+{% endblock %}
+
+{% block body_block %}
+<div class="input-container">
+  <h3>Update Balance Payment</h3>
+
+  <form action="" method="post">
+    {% csrf_token %}
+
+    {% for hidden in form.hidden_fields %}
+      {{ hidden }}
+    {% endfor %}
+
+    <table class="input-table">
+      {% for field in form.visible_fields %}
+        {{ field.errors }}
+        <tr>
+          <td class="label">{{ field.label }}</td>
+          <td class="field">
+            {{ field }}
+          </td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <td>
+          <a class="anchor-btn" href="{% url 'invoice:party_detail' party_id %}">
+            Back
+          </a>
+        </td>
+        <td class="right-align">
+          <button type="submit" class="btn btn-primary">Update</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+{% endblock %}

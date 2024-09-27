@@ -1,14 +1,14 @@
 {% extends '_base.html' %}
 
 {% block title_block %}
-  Party
+  Item/Service
 {% endblock %}
 
 {% block body_block %}
   <div class="input-container">
-    <h3>Edit party</h3>
+    <h3>Edit item/service</h3>
 
-    <form id="party-form" action="" method="post">
+    <form id="party-form" action="{% url 'invoice:item_detail' p_id %}" method="post">
       {% csrf_token %}
 
       {% for hidden in form.hidden_fields %}
@@ -23,10 +23,9 @@
             <td class="field">{{ field }}</td>
           </tr>
         {% endfor %}
-
         <tr>
           <td>
-            <a class="anchor-btn" href="{% url 'invoice:parties' %}">
+            <a class="anchor-btn" href="{% url 'invoice:stock' %}">
               Back
             </a>
           </td>
