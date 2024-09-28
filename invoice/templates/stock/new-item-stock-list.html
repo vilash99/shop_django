@@ -29,20 +29,10 @@
     </div>
 
     <form id="item-form" class="tab-content active" action="{% url 'invoice:stock' %}" method="post">
-      {% csrf_token %}
-
-      {% for hidden in item_form.hidden_fields %}
-	      {{ hidden }}
-      {% endfor %}
+      {% include 'includes/_form_hidden.html' with form_name=item_form %}
 
       <table class="input-table">
-        {% for field in item_form.visible_fields %}
-          {{ field.errors }}
-          <tr>
-            <td class="label">{{ field.label }}</td>
-            <td class="field">{{ field }}</td>
-          </tr>
-        {% endfor %}
+        {% include 'includes/_form_fields.html' with form_name=item_form %}
         <tr>
           <td></td>
           <td class="right-align">
@@ -55,20 +45,11 @@
     </form>
 
     <form id="service-form" class="tab-content" action="{% url 'invoice:stock' %}" method="post">
-      {% csrf_token %}
-
-      {% for hidden in service_form.hidden_fields %}
-	      {{ hidden }}
-      {% endfor %}
+      {% include 'includes/_form_hidden.html' with form_name=service_form %}
 
       <table class="input-table">
-        {% for field in service_form.visible_fields %}
-          {{ field.errors }}
-          <tr>
-            <td class="label">{{ field.label }}</td>
-            <td class="field">{{ field }}</td>
-          </tr>
-        {% endfor %}
+        {% include 'includes/_form_fields.html' with form_name=service_form %}
+
         <tr>
           <td></td>
           <td class="right-align">
@@ -142,17 +123,21 @@
   <script>
     /*Tab design */
     function openTab(evt, tabName) {
-      let i, tabContent, tabLinks;
-      tabContent = document.getElementsByClassName("tab-content");
-      tabContent[0].className = tabContent[0].className.replace(" active", "");
-      tabContent[1].className = tabContent[1].className.replace(" active", "");
+      // Select all tab contents and remove the 'active' class
+      const tabContent = document.getElementsByClassName("tab-content");
+      Array.from(tabContent).forEach((content) => {
+        content.classList.remove("active");
+      });
 
-      tabLinks = document.getElementsByClassName("tab-links");
-      tabLinks[0].className = tabLinks[0].className.replace(" active", "");
-      tabLinks[1].className = tabLinks[1].className.replace(" active", "");
+      // Select all tab links and remove the 'active' class
+      const tabLinks = document.getElementsByClassName("tab-links");
+      Array.from(tabLinks).forEach((link) => {
+        link.classList.remove("active");
+      });
 
-      document.getElementById(tabName).className += " active"
-      evt.currentTarget.className += " active";
+      // Add the 'active' class to the selected tab and link
+      document.getElementById(tabName).classList.add("active");
+      evt.currentTarget.classList.add("active");
     }
   </script>
 {% endblock %}

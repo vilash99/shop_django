@@ -20,20 +20,11 @@
   {% endif %}
 
   <form id="party-form" action="" method="post">
-    {% csrf_token %}
-
-    {% for hidden in form.hidden_fields %}
-      {{ hidden }}
-    {% endfor %}
+    {% include 'includes/_form_hidden.html' with form_name=form %}
 
     <table class="input-table">
-      {% for field in form.visible_fields %}
-        {{ field.errors }}
-        <tr>
-          <td class="label">{{ field.label }}</td>
-          <td class="field">{{ field }}</td>
-        </tr>
-      {% endfor %}
+      {% include 'includes/_form_fields.html' with form_name=form %}
+
       <tr>
         <td class="label">Balance</td>
         <td class="{% if party.balance_amount < 0 %}negative-price{% else %}price-field{% endif %}">

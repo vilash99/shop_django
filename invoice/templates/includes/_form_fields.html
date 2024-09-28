@@ -1,0 +1,8 @@
+{% for field in form_name.visible_fields %}
+  {{ field.errors }}
+  <tr>
+    <td class="label">{{ field.label }}</td>
+    <td class="field">{{ field }}</td>
+  </tr>
+{% endfor %}
+

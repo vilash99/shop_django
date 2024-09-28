@@ -1,0 +1,5 @@
+{% csrf_token %}
+
+{% for hidden in form_name.hidden_fields %}
+  {{ hidden }}
+{% endfor %}

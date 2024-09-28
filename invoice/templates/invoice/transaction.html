@@ -40,11 +40,7 @@
     </div>
 
     <form id="items" class="tab-content active" action="{% url 'invoice:transaction_detail' p_id %}" method="post">
-      {% csrf_token %}
-
-      {% for hidden in item_form.hidden_fields %}
-	      {{ hidden }}
-      {% endfor %}
+      {% include 'includes/_form_hidden.html' with form_name=item_form %}
 
       <table class="input-table">
         {% for field in item_form.visible_fields %}
@@ -75,20 +71,10 @@
     </form>
 
     <form id="services" class="tab-content" action="{% url 'invoice:transaction_detail' p_id %}" method="post">
-      {% csrf_token %}
-
-      {% for hidden in service_form.hidden_fields %}
-	      {{ hidden }}
-      {% endfor %}
+      {% include 'includes/_form_hidden.html' with form_name=service_form %}
 
       <table class="input-table">
-        {% for field in service_form.visible_fields %}
-          {{ field.errors }}
-          <tr>
-            <td class="label">{{ field.label }}</td>
-            <td class="field">{{ field }}</td>
-          </tr>
-        {% endfor %}
+        {% include 'includes/_form_fields.html' with form_name=service_form %}
 
         <tr>
           <td>

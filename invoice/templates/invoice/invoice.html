@@ -18,22 +18,11 @@
     <h3>New invoice</h3>
 
     <form action="" method="post">
-      {% csrf_token %}
-
-      {% for hidden in form.hidden_fields %}
-	      {{ hidden }}
-      {% endfor %}
+      {% include 'includes/_form_hidden.html' with form_name=form %}
 
       <table class="input-table">
-        {% for field in form.visible_fields %}
-          {{ field.errors }}
-          <tr>
-            <td class="label">{{ field.label }}</td>
-            <td class="field">
-              {{ field }}
-            </td>
-          </tr>
-        {% endfor %}
+        {% include 'includes/_form_fields.html' with form_name=form %}
+
         <tr>
           <td></td>
           <td class="right-align">
@@ -129,15 +118,17 @@
 
   <script type='text/javascript'>
     $(document).ready(function() {
-      ///Delete Invoice
-      $('.icon-delete').on('click', function() {
+      // Delete Invoice
+
+      $(document).on('click', '.icon-delete', function() {
         if (confirm('Are you sure to delete?')) {
           let invoiceId = $(this).attr("invoice-id");
+
           if (invoiceId) {
             $.ajax({
               url: "{% url 'invoice:delete_invoice_ajax' %}",
               type: "GET",
-              data: {invoice_id: invoiceId},
+              data: { invoice_id: invoiceId },
             }).done(function (response) {
               if(response.result == "failed") {
                 alert("Please delete all transaction of selected invoice before delete!");
@@ -145,6 +136,8 @@
               else {
                 location.reload();
               }
+            }).fail(function() {
+              alert("An error occurred while processing the request.");
             });
           }
         }
@@ -152,10 +145,10 @@
     });
   </script>
 
-   <script>
-      $("#id_party").select2( {
-        placeholder: "Select name",
-        allowClear: true
-      });
-  </script>
+  <script>
+    $("#id_party").select2( {
+      placeholder: "Select name",
+      allowClear: true
+    });
+</script>
 {% endblock %}
