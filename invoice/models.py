@@ -98,6 +98,11 @@ class Transaction(models.Model):
         discounted_price = self.price * (1 - self.discount_percent / 100)
         return round(discounted_price * self.quantity) if self.item_type == "Item" else discounted_price
 
+    @property
+    def actual_amount(self):
+        """Return actual amount without discount value"""
+        return (self.quantity * self.price) if self.item_type == "Item" else self.price
+
     def save(self, *args, **kwargs):
         """Override save method to automatically update the amount."""
         self.amount = self.discounted_amount

@@ -59,22 +59,25 @@
     <tr>
       <th style="text-align: left;">Item name</th>
       <th class="right-field">Price/Unit</th>
-      <th>Quantity</th>
+      <th>Qty</th>
+      <th>Amount</th>
       <th>Discount %</th>
-      <th class="right-field">Amount</th>
+      <th class="right-field">Net Amount</th>
     </tr>
     {% for trans in transactions %}
       <tr>
         <td class="name-cell">{{ trans.item.name }}</td>
         <td class="right-field">₹ {{ trans.price|intcomma }}.00</td>
-        <td class="center-field">
-          {% if trans.quantity == 0 %}
-            -
-          {% else %}
-            {{ trans.quantity }}
-          {% endif %}
+        {% if trans.quantity == 0 %}
+          <td class="center-field">-</td>
+          <td class="right-field">₹ {{ trans.price|intcomma }}.00
         </td>
-        <td class="right-field">{{ trans.discount_percent }}%</td>
+        {% else %}
+          <td class="center-field">{{ trans.quantity }}</td>
+          <td class="right-field">₹ {{ trans.actual_amount |intcomma }}.00
+        {% endif %}
+
+        <td class="center-field">{{ trans.discount_percent }}%</td>
         <td class="right-field">₹ {{ trans.amount|intcomma }}.00</td>
       </tr>
     {% endfor %}
