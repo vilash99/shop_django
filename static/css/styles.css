@@ -373,3 +373,10 @@ footer {
 .center-container h1 {
   font-size: 4rem;
 }
+
+ul.errorlist {
+  list-style-type: none;
+  background-color: #F2DEDE;
+  color: #AF4E5F;
+  padding: 0.75rem 1.25rem;
+}

@@ -119,6 +119,7 @@
         <th>Items</th>
         <th>Price</th>
         <th>Quantity</th>
+        <th>Discount</th>
         <th>Amount</th>
         <th></th>
       </tr>
@@ -133,6 +134,15 @@
               {{ trans.quantity }}
             {% endif %}
           </td>
+
+          <td class="center-field">
+            {% if trans.discount_percent == 0 %}
+              -
+            {% else %}
+              {{ trans.discount_percent }}%
+            {% endif %}
+          </td>
+
           <td class="price-field">₹ {{ trans.amount|intcomma }}.00</td>
           <td class="center-field">
             <a class="icon-delete" trans-id="{{trans.id}}">
@@ -154,71 +164,68 @@
 
   <script type='text/javascript'>
     $(document).ready(function() {
-      ///Delete transaction
+      // Delete transaction
       $('.icon-delete').on('click', function() {
-        if (confirm('Are you sure to delete?')) {
-          let transId = $(this).attr("trans-id");
-          if (transId != "") {
-            $.ajax({
-              url: "{% url 'invoice:delete_transaction_ajax' %}",
-              type: "GET",
-              data: {
-                trans_id: transId,
-              },
-            }).done(function (response) {
-              location.reload();
-            });
-          }
+        let transId = $(this).attr("trans-id");
+
+        if (transId && confirm('Are you sure to delete?')) {
+          $.get("{% url 'invoice:delete_transaction_ajax' %}", { trans_id: transId })
+          .done(() => location.reload());
         }
       });
 
-      function get_price(id, price, quantity=null) {
-        if(id != "") {
-          $.ajax({
-            url: "{% url 'invoice:get_item_ajax' %}",
-            type: 'GET',
-            data: {
-                item_id: id,
-            },
-          }).done(function(response) {
+      // Fetch Item Price
+      function getPrice(id, price, discount, quantity=null) {
+        if(id) {
+          $.get("{% url 'invoice:get_item_ajax' %}", { item_id: id })
+          .done(response => {
             $(price).val(response.price);
+            $(discount).val(response.discount);
 
-            if(quantity) {
+            if (quantity) {
               $(quantity).text(`Total quantity: ${response.quantity}`);
+              calculateAmount();
+            }
+            else {
+              calculateAmountService();
             }
           });
         }
       }
 
-      /// Fetch item price
-      $('#items #id_item').change(function () {
-        let id = $(this).val();
-        let price = $("#items #id_price");
-        let quantity = $("#items #total-quantity");
-        get_price(id, price, quantity);
-      });
-
-      $('#services #id_item').change(function () {
-        let id = $(this).val();
-        let price = $("#services #id_amount");
-        get_price(id, price);
+      // Change events for fetching item price
+      $('#items #id_item, #services #id_item').change(function () {
+        const isService = $(this).closest('#services').length > 0;
+        const id = $(this).val();
+        const price = isService ? $("#services #id_amount") : $("#items #id_price");
+        const discount = isService ? $("#services #id_discount_percent") : $("#items #id_discount_percent");
+        const quantity = isService ? null : $("#items #total-quantity");
+        getPrice(id, price, discount, quantity);
       });
 
       // Calculate total amount from quantity and price
-      function calculate_amount() {
-        let price = $("#items #id_price").val();
-        let quantity = $("#items #id_quantity").val();
+      function calculateAmount() {
+        const price = parseFloat($("#items #id_price").val()) || 0;
+        const quantity = parseInt($("#items #id_quantity").val()) || 0;
+        const discount_percent = parseFloat($("#items #id_discount_percent").val()) || 0;
         $("#items #id_amount").val(price * quantity);
+        $("#items #id_net_amount").val(parseInt((price * (1 - discount_percent/100)) * quantity));
       }
 
-      $('#items #id_price').focusout(function () {
-        calculate_amount();
-      });
+      // Calculate total amount for service
+       function calculateAmountService() {
+        const amount = parseFloat($("#services #id_amount").val()) || 0;
+        const discount_percent = parseFloat($("#services #id_discount_percent").val()) || 0;
+        $("#services #id_net_amount").val(parseInt(amount * (1 - discount_percent/100)));
+      }
 
-      $('#items #id_quantity').focusout(function () {
-        calculate_amount();
-      });
+      // Event listeners for recalculating amount for Item
+      $('#items #id_price, #items #id_quantity, #items #id_discount_percent').focusout(calculateAmount);
 
+      // Event listeners for recalculating amount for Services
+      $('#services #id_amount, #id_amount #id_discount_percent').focusout(calculateAmountService);
+
+      // Initialize Select2 for item selection
       $("#items #id_item").select2( {
         placeholder: "Select Item",
         allowClear: true
@@ -234,17 +241,9 @@
   <script>
     /*Tab design */
     function openTab(evt, tabName) {
-      let i, tabContent, tabLinks;
-      tabContent = document.getElementsByClassName("tab-content");
-      tabContent[0].className = tabContent[0].className.replace(" active", "");
-      tabContent[1].className = tabContent[1].className.replace(" active", "");
-
-      tabLinks = document.getElementsByClassName("tab-links");
-      tabLinks[0].className = tabLinks[0].className.replace(" active", "");
-      tabLinks[1].className = tabLinks[1].className.replace(" active", "");
-
-      document.getElementById(tabName).className += " active"
-      evt.currentTarget.className += " active";
+      document.querySelectorAll(".tab-content.active, .tab-links.active").forEach(el => el.classList.remove("active"));
+      document.getElementById(tabName).classList.add("active");
+      evt.currentTarget.classList.add("active");
     }
   </script>
 

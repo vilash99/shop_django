@@ -361,8 +361,14 @@ class PrintInvoiceView(LoginRequiredMixin, View):
         # Get Invoice transactions
         transactions = Transaction.objects.filter(sales=p_id)
 
-        # Get Total
+        # Get Total after discount
         net_total = transactions.aggregate(Sum('amount'))['amount__sum'] or 0
+
+        # # Get Total before discount
+        # total_before_discount = sum(transaction.original_amount for transaction in transactions)
+
+        # # Get Total discount
+        # total_discount = sum(transaction.discount_amount for transaction in transactions)
 
         context = {
             'company': company,
@@ -418,7 +424,11 @@ def get_item_ajax(request):
     if request.method == 'GET':
         item_id = request.GET.get('item_id', '')
         item = get_object_or_404(ItemService, id=item_id)
-        return JsonResponse({'price': item.price, 'quantity': item.quantity})
+        return JsonResponse({
+            'price': item.price,
+            'quantity': item.quantity,
+            'discount': item.discount,
+        })
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 

@@ -83,6 +83,7 @@ class Transaction(models.Model):
     price = models.PositiveIntegerField(default=0)
     quantity = models.IntegerField(default=0, help_text="Set to 0 if service")
     amount = models.PositiveIntegerField(default=0)
+    discount_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def __str__(self):
         return "{} - {}".format(self.item.name, self.sale.party.name)
@@ -90,6 +91,17 @@ class Transaction(models.Model):
     @property
     def item_type(self):
         return "Item" if self.item.item_type else "Service"
+
+    @property
+    def discounted_amount(self):
+        """Calculate discounted amount and round it to the nearest whole number."""
+        discounted_price = self.price * (1 - self.discount_percent / 100)
+        return round(discounted_price * self.quantity) if self.item_type == "Item" else discounted_price
+
+    def save(self, *args, **kwargs):
+        """Override save method to automatically update the amount."""
+        self.amount = self.discounted_amount
+        super().save(*args, **kwargs)
 
 
 

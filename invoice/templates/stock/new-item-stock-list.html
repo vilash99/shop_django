@@ -103,7 +103,7 @@
       <tr>
         <th>Name</th>
         <th>Price</th>
-        <th>Discount %</th>
+        <th>Discount</th>
         <th>Available<br>Quantity</th>
         <th>Type</th>
         <th></th>
@@ -113,7 +113,11 @@
         <tr>
           <td>{{ item.name }}</td>
           <td>₹ {{ item.price|intcomma }}.00</td>
-          <td>{{ item.discount }} %</td>
+          {% if item.discount %}
+            <td class="center-field">{{ item.discount }}%</td>
+          {% else %}
+            <td class="center-field">-</td>
+          {% endif %}
 
           {% if item.item_type %}
             <td class="center-field">{{ item.quantity }}</td>

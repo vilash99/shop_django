@@ -14,10 +14,10 @@
 
   <div class="div-flex">
     <div>
-      <div class="company-name">{{company.name}}</div>
-      <p>{{company.address}}</p>
-      <p>{{company.phone}}</p>
-      <p>{{company.reg_no}}</p>
+      <div class="company-name">{{ company.name }}</div>
+      <p>{{ company.address }}</p>
+      <p>{{ company.phone }}</p>
+      <p>{{ company.reg_no }}</p>
     </div>
 
     <div class="company-logo">
@@ -32,11 +32,11 @@
       <table>
         <tr>
           <td>Bill to:</td>
-          <td>&nbsp;<b>{{bill.party.name}}</b></td>
+          <td>&nbsp;<b>{{ bill.party.name }}</b></td>
         </tr>
         <tr>
           <td>Address:</td>
-          <td>&nbsp;<b>{{bill.party.address}}</b></td>
+          <td>&nbsp;<b>{{ bill.party.address }}</b></td>
         </tr>
       </table>
     </div>
@@ -45,11 +45,11 @@
       <table>
         <tr>
           <td>Invoice No:</td>
-          <td>&nbsp;<b>{{bill.id}}</b></b></td>
+          <td>&nbsp;<b>{{ bill.id }}</b></b></td>
         </tr>
         <tr>
           <td>Bill Date:</td>
-          <td>&nbsp;<b>{{bill.bill_date|date:"d-m-Y"}}</b></td>
+          <td>&nbsp;<b>{{ bill.bill_date|date:"d-m-Y" }}</b></td>
         </tr>
       </table>
     </div>
@@ -60,12 +60,13 @@
       <th style="text-align: left;">Item name</th>
       <th class="right-field">Price/Unit</th>
       <th>Quantity</th>
+      <th>Discount %</th>
       <th class="right-field">Amount</th>
     </tr>
     {% for trans in transactions %}
       <tr>
-        <td class="name-cell">{{trans.item.name}}</td>
-        <td class="right-field">₹ {{trans.price|intcomma}}.00</td>
+        <td class="name-cell">{{ trans.item.name }}</td>
+        <td class="right-field">₹ {{ trans.price|intcomma }}.00</td>
         <td class="center-field">
           {% if trans.quantity == 0 %}
             -
@@ -73,7 +74,8 @@
             {{ trans.quantity }}
           {% endif %}
         </td>
-        <td class="right-field">₹ {{trans.amount|intcomma}}.00</td>
+        <td class="right-field">{{ trans.discount_percent }}%</td>
+        <td class="right-field">₹ {{ trans.amount|intcomma }}.00</td>
       </tr>
     {% endfor %}
   </table>
@@ -92,7 +94,7 @@
     <div class="small-text">
       <p><b>Terms & Conditions</b></p>
       <p>1. Goods once sold will not be taken back or exchanged.</p>
-      <p>2. Jobwork will not have any kind of guarantee and warranty.</p>
+      <p>2. Job work will not have any kind of guarantee and warranty.</p>
     </div>
     <div style="text-align: center;">
       <p>___________________________</p>

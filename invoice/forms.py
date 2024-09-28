@@ -95,8 +95,19 @@ class TransactionItemForm(forms.ModelForm):
     price = forms.IntegerField(initial=0, label='Price')
     quantity = forms.IntegerField(initial=1, label='Quantity')
     amount = forms.IntegerField(initial=0, label='Amount')
+    discount_percent = forms.DecimalField(
+        initial=0,
+        label='Discount %',
+        widget=forms.NumberInput(attrs={'min': 0})
+    )
+    net_amount = forms.DecimalField(
+        initial=0,
+        label='Net Amount',
+        required=False,
+        widget=forms.NumberInput(attrs={'readonly': 'readonly'})
+    )  # Field just for display, no effect on saving
 
-    field_order = ['item', 'price', 'quantity', 'amount']
+    field_order = ['item', 'price', 'quantity', 'amount', 'discount_percent', 'net_amount']
 
     class Meta:
         model = Transaction
@@ -109,6 +120,19 @@ class TransactionServiceForm(forms.ModelForm):
         label='Service Title',
     )
     amount = forms.IntegerField(initial=0, help_text='Amount')
+    discount_percent = forms.DecimalField(
+        initial=0,
+        label='Discount %',
+        widget=forms.NumberInput(attrs={'min': 0})
+    )
+    net_amount = forms.DecimalField(
+        initial=0,
+        label='Net Amount',
+        required=False,
+        widget=forms.NumberInput(attrs={'readonly': 'readonly'})
+    )  # Field just for display, no effect on saving
+
+    field_order = ['item', 'amount', 'discount_percent', 'net_amount']
 
     class Meta:
         model = Transaction
