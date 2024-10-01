@@ -27,7 +27,7 @@
 
       <tr>
         <td class="label">Balance</td>
-        <td class="{% if party.balance_amount < 0 %}negative-price{% else %}price-field{% endif %}">
+        <td class="{% if party.balance_amount > 0 %}negative-price{% else %}price-field{% endif %}">
           ₹ {{ party.balance_amount|default:0|intcomma }}.00
         </td>
       </tr>
@@ -59,7 +59,7 @@
     <tr>
       <th>Date</th>
       <th>Paid Amount</th>
-      <th colspan="2"></th>
+      <th></th>
     </tr>
 
     {% for transaction in page_obj %}
@@ -67,14 +67,9 @@
         <td>{{ transaction.pay_date }}</td>
         <td class="price-field">₹ {{ transaction.amount|default:0|intcomma }}.00</td>
         <td class="center-field">
-          <a class="icon-edit" href="{% url 'invoice:balance_payment_update' transaction.id %}">
-            <img src="{% static 'images/icon-edit.png' %}" alt="Edit">
+          <a class="icon-delete" transaction-id="{{transaction.id}}">
+            <img src="{% static 'images/icon-delete.png' %}" alt="Delete">
           </a>
-        </td>
-          <td class="center-field">
-            <a class="icon-delete" transaction-id="{{transaction.id}}">
-              <img src="{% static 'images/icon-delete.png' %}" alt="Delete">
-            </a>
         </td>
       </tr>
     {% empty %}

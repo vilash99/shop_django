@@ -3,7 +3,6 @@ from django.db import models
 from django.urls import reverse
 
 
-
 class Profile(models.Model):
     name = models.CharField(max_length=128)
     phone = models.CharField(max_length=50)
@@ -23,6 +22,8 @@ class Party(models.Model):
     address = models.CharField(max_length=128)
     balance_amount = models.IntegerField(default=0, verbose_name="Balance Amount")
 
+    # Has Signal to update 'balance_amount when 'PartyBalance' is added/updated/deleted
+
     class Meta:
         verbose_name_plural = 'Parties'
 
@@ -31,18 +32,6 @@ class Party(models.Model):
 
     def get_absolute_url(self):
         return reverse('invoice:parties')
-
-
-class PartyBalance(models.Model):
-    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name="balances")
-    pay_date = models.DateField(default=date.today, verbose_name="Payment Date")
-    amount = models.IntegerField(default=0)
-
-    def __str__(self):
-        return "{} - {} on {}".format(self.party.name, self.amount, self.pay_date)
-
-    def get_absolute_url(self):
-        return reverse('invoice:party_detail', kwargs={'pk': self.party.pk})
 
 
 class ItemService(models.Model):
@@ -69,12 +58,17 @@ class ItemService(models.Model):
 class Sale(models.Model):
     bill_date = models.DateField(default=date.today, verbose_name="Bill Date")
     party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name="sales")
+    total_amount = models.PositiveIntegerField(default=0)
+    amount_paid = models.PositiveIntegerField(default=0)
+    remaining_balance = models.PositiveIntegerField(default=0)
+
+    # Have Signal to Update 'total_amount' when related Transaction 'added/updated/deleted'
 
     def __str__(self):
         return "Sale on {} - {}".format(self.bill_date, self.party.name)
 
     def get_absolute_url(self):
-        return reverse('invoice:transaction', kwargs={'p_id': self.pk})
+        return reverse('invoice:transaction_detail', kwargs={'p_id': self.pk})
 
 
 class Transaction(models.Model):
@@ -84,6 +78,8 @@ class Transaction(models.Model):
     quantity = models.IntegerField(default=0, help_text="Set to 0 if service")
     amount = models.PositiveIntegerField(default=0)
     discount_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+
+    # Have Signal to Update 'total_amount' when related Transaction 'added/updated/deleted'
 
     def __str__(self):
         return "{} - {}".format(self.item.name, self.sale.party.name)
@@ -109,6 +105,15 @@ class Transaction(models.Model):
         super().save(*args, **kwargs)
 
 
+class PartyBalance(models.Model):
+    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name="balances")
+    pay_date = models.DateField(default=date.today, verbose_name="Payment Date")
+    amount = models.IntegerField(default=0)
 
+    # Has Signal to update 'balance_amount when 'PartyBalance' is added/updated/deleted
 
+    def __str__(self):
+        return "{} - {} on {}".format(self.party.name, self.amount, self.pay_date)
 
+    def get_absolute_url(self):
+        return reverse('invoice:party_detail', kwargs={'pk': self.party.pk})

@@ -15,7 +15,6 @@ urlpatterns = [
     path('parties/', views.PartiesView.as_view(), name='parties'),
     path('party/<int:pk>/', views.SinglePartyView.as_view(), name='party_detail'),
     path('party/<int:pk>/payment/', views.PartyBalanceView.as_view(), name='party_balance_payment'),
-    path('party/payment/<int:pk>/update/', views.PartyBalanceUpdateView.as_view(), name='balance_payment_update'),
 
     # Stock and Item Views
     path('stock/', views.StockView.as_view(), name='stock'),
@@ -25,6 +24,7 @@ urlpatterns = [
     path('invoice/', views.InvoiceView.as_view(), name='invoice_list'),
     path('invoice/<int:p_id>/', views.TransactionView.as_view(), name='transaction_detail'),
     path('invoice/<int:p_id>/print/', views.PrintInvoiceView.as_view(), name='print_invoice'),
+    path('invoice/<int:sale_id>/payment/', views.InvoicePaymentView.as_view(), name='invoice_payment'),
 
     # AJAX Views
     path('delete_invoice_ajax/', views.delete_invoice_ajax, name='delete_invoice_ajax'),

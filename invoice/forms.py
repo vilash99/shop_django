@@ -37,11 +37,15 @@ class ItemServiceForm(forms.ModelForm):
         label='Price'
     )
     discount = forms.DecimalField(
-        max_digits=5,
+        max_digits=4,
         decimal_places=2,
         initial=0.00,
-        label='Discount'
+        label='Discount',
+        widget=forms.NumberInput(attrs={'min': 0, 'max': 99}),
+
     )
+
+    field_order = ['name', 'price', 'quantity', 'discount']
 
     def clean_name(self):
         """Check for same name for other ids"""
@@ -84,7 +88,7 @@ class InvoiceForm(forms.ModelForm):
 
     class Meta:
         model = Sale
-        exclude = ['id']
+        exclude = ['id', 'total_amount', 'amount_paid', 'remaining_balance']
 
 
 class TransactionItemForm(forms.ModelForm):

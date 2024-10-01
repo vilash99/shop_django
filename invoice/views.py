@@ -1,14 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView
+from django.views.decorators.csrf import csrf_exempt
+
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.db.models import Sum, F, Q
 from django.core.paginator import Paginator
-from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 
 from invoice.models import (
     Profile, Party, ItemService, Sale, Transaction, PartyBalance
@@ -27,7 +31,7 @@ class ProfileView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Profile
     template_name = 'common/profile.html'
     fields = ['name', 'phone', 'address', 'reg_no']
-    success_message = 'Company updated successfully!'
+    success_message = 'Company details are updated successfully!'
 
 
 class PartiesView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -51,7 +55,7 @@ class PartiesView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         search_txt = self.request.GET.get('q', '')
 
         qs = Party.objects.annotate(
-            total_bill=Sum('sales__transactions__amount')
+            total_bill=Sum('sales__total_amount')
         ).filter(name__icontains=search_txt).order_by('name')
 
         return qs
@@ -112,10 +116,12 @@ class PartyBalanceView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """
     Add new balance entry for a party and show all balances for parties.
     """
+    # Has Signal to update 'balance_amount when 'PartyBalance' is added/updated/deleted
+
     model = PartyBalance
     template_name = 'party/balance_payment.html'
     form_class = PartyBalanceForm
-    success_message = 'Party balance is saved successfully!'
+    success_message = 'Party balance is paid successfully!'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -127,30 +133,12 @@ class PartyBalanceView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        party = get_object_or_404(Party, pk=self.kwargs['pk'])
         context.update({
             'party_id': self.kwargs['pk'],
+            'party': party,
         })
         return context
-
-
-class PartyBalanceUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-    """
-    Update an existing balance entry for a party.
-    """
-    model = PartyBalance
-    form_class = PartyBalanceForm
-    template_name = 'party/update_balance_payment.html'
-    success_message = 'Party balance has been updated successfully!'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'party_id': self.object.party.pk,
-        })
-        return context
-
-    def get_success_url(self):
-        return f"/party/{self.object.party.pk}/"
 
 
 class StockView(LoginRequiredMixin, ListView):
@@ -210,7 +198,6 @@ class StockView(LoginRequiredMixin, ListView):
             'item_form': item_form,
             'service_form': service_form,
         }
-
         return render(request, self.template_name, context)
 
 
@@ -267,11 +254,9 @@ class InvoiceView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         if search_party:
             filters &= Q(party__name__icontains=search_party)
 
-        qs = Sale.objects.filter(filters).annotate(
-            net_total=Sum('transactions__amount')
-        ).order_by('-bill_date')
+        qs = Sale.objects.filter(filters).order_by('-bill_date')
 
-        net_total = qs.aggregate(Sum('net_total'))['net_total__sum'] or 0
+        net_total = qs.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
 
         return qs, net_total
 
@@ -297,22 +282,26 @@ class TransactionView(LoginRequiredMixin, View):
     """
     Create new invoice and show previous invoices
     """
+    # Have Signal to Update 'total_amount' when related Transaction 'added/updated/deleted'
+
     model = Transaction
     template_name = 'invoice/transaction.html'
 
     def get(self, request, p_id):
         sale = get_object_or_404(Sale, id=p_id)
         transactions = Transaction.objects.filter(sales=p_id)
-        net_total = transactions.aggregate(Sum('amount'))['amount__sum'] or 0
 
         context = {
             'data': sale,
             'transactions': transactions,
-            'net_total': net_total,
-            'item_form': TransactionItemForm(),
-            'service_form': TransactionServiceForm(),
             'p_id': p_id,
         }
+
+        if sale.amount_paid == 0:
+            context.update({
+                'item_form': TransactionItemForm(),
+                'service_form': TransactionServiceForm(),
+            })
 
         return render(request, self.template_name, context)
 
@@ -361,9 +350,6 @@ class PrintInvoiceView(LoginRequiredMixin, View):
         # Get Invoice transactions
         transactions = Transaction.objects.filter(sales=p_id)
 
-        # Get Total after discount
-        net_total = transactions.aggregate(Sum('amount'))['amount__sum'] or 0
-
         # # Get Total before discount
         # total_before_discount = sum(transaction.original_amount for transaction in transactions)
 
@@ -374,10 +360,46 @@ class PrintInvoiceView(LoginRequiredMixin, View):
             'company': company,
             'bill': bill,
             'transactions': transactions,
-            'net_total': net_total,
         }
 
         return render(request, self.template_name, context)
+
+
+class InvoicePaymentView(LoginRequiredMixin, View):
+    template_name = 'invoice/invoice_payment.html'
+
+    def get(self, request, sale_id):
+        sale = get_object_or_404(Sale, pk=sale_id)
+        return render(request, self.template_name, {'sale': sale})
+
+    def post(self, request, sale_id):
+        sale = get_object_or_404(Sale, pk=sale_id)
+
+        try:
+            payment_amount = int(request.POST.get('payment_amount', 0))
+        except ValueError:
+            messages.error(request, "Invalid payment amount.")
+            return redirect(sale.get_absolute_url())
+
+        if payment_amount <= 0:
+            messages.error(request, "Payment amount must be greater than zero.")
+            return redirect(sale.get_absolute_url())
+
+        if payment_amount > sale.total_amount:
+            messages.error(request, "Payment should not more than total amount.")
+            return redirect(sale.get_absolute_url())
+
+
+        sale.amount_paid = payment_amount
+        sale.remaining_balance = sale.total_amount - payment_amount
+        sale.save()
+
+        # Update balance amount for current party
+        sale.party.balance_amount = F('balance_amount') + sale.remaining_balance
+        sale.party.save(update_fields=['balance_amount'])
+
+        messages.success(request, "Payment successfully received.")
+        return redirect(sale.get_absolute_url())
 
 
 @method_decorator(csrf_exempt, name='dispatch')

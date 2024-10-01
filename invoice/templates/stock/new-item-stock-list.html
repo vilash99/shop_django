@@ -9,7 +9,7 @@
 
 {% block body_block %}
   <div class="input-container">
-    <h3>New items/services</h3>
+    <h3>Add New Items/Services</h3>
 
     {% if messages %}
       {% for message in messages %}
@@ -84,8 +84,8 @@
       <tr>
         <th>Name</th>
         <th>Price</th>
-        <th>Discount</th>
         <th>Available<br>Quantity</th>
+        <th>Discount</th>
         <th>Type</th>
         <th></th>
       </tr>
@@ -94,6 +94,13 @@
         <tr>
           <td>{{ item.name }}</td>
           <td>₹ {{ item.price|intcomma }}.00</td>
+
+          {% if item.item_type %}
+            <td class="center-field">{{ item.quantity }}</td>
+          {% else %}
+            <td class="center-field">-</td>
+          {% endif %}
+
           {% if item.discount %}
             <td class="center-field">{{ item.discount }}%</td>
           {% else %}
@@ -101,10 +108,8 @@
           {% endif %}
 
           {% if item.item_type %}
-            <td class="center-field">{{ item.quantity }}</td>
             <td>ITEM</td>
           {% else %}
-            <td class="center-field">-</td>
             <td>SERVICE</td>
           {% endif %}
 

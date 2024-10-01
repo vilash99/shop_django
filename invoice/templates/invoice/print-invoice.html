@@ -87,7 +87,7 @@
       <p class="small-text" id="print-date"></p>
     </div>
     <div class="total-amount">
-      Total: <span>₹ {{ net_total|default:0|intcomma }}.00</span>
+      Total: <span>₹ {{ bill.total_amount|default:0|intcomma }}.00</span>
     </div>
   </div>
 

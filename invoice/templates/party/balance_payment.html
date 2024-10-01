@@ -15,6 +15,10 @@
     {% include 'includes/_form_hidden.html' with form_name=form %}
 
     <table class="input-table">
+      <tr>
+        <td>Total Balance:</td>
+        <td class="price-field">₹ {{ party.balance_amount|intcomma }}.00</td>
+      </tr>
       {% include 'includes/_form_fields.html' with form_name=form %}
 
       <tr>

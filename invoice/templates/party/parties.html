@@ -71,7 +71,7 @@
           <td>{{ party.name }}</td>
           <td class="price-field">₹ {{ party.total_bill|default:0|intcomma }}.00</td>
 
-          <td class="{% if party.balance_amount < 0 %}negative-price{% else %}price-field{% endif %}">
+          <td class="{% if party.balance_amount > 0 %}negative-price{% else %}price-field{% endif %}">
             ₹ {{ party.balance_amount|default:0|intcomma }}.00
           </td>
 

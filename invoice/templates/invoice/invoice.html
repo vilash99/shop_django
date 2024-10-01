@@ -83,7 +83,7 @@
         <tr>
           <td>{{ invoice.bill_date|date:"d-m-Y" }}</td>
           <td>{{ invoice.party.name }}</td>
-          <td class="price-field">₹ {{ invoice.net_total|default:0|intcomma }}.00</td>
+          <td class="price-field">₹ {{ invoice.total_amount|default:0|intcomma }}.00</td>
 
           <td class="center-field">
             <a class="icon-edit" href="{% url 'invoice:transaction_detail' invoice.id %}">
